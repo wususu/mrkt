@@ -1,12 +1,12 @@
 package com.mrkt.authorization.interceptor;
 
 import java.lang.reflect.Method;
+import java.net.URLEncoder;
 
 import javax.servlet.http.*;
 
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -34,10 +34,17 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter{
 	private String xAuthType;
 	private String xAuthHeader;
 	private String xAuthTypeToken;
+	private String wxRedirectUri;
+	private String wxAppId;
 	
 	private final static String X_Auth_Type = "com.mrkt.request.auth_type";
 	private final static String X_Auth_Header = "com.mrkt.request.auth_header";
 	private final static String X_Auth_Type_Token = "com.mrkt.request.auth_type.token";
+	
+	private final static String WX_APP_ID = "wx.app.id";
+	//在线上环境时Redirect_uri应该为前端应用地址
+	private final static String WX_APP_REDIRECT_URI = "wx.app.redirect_uri";
+	
 	
 	{
 		cgr = Configurator.getInstance();
@@ -46,6 +53,8 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter{
 		this.xAuthType = cgr.get(X_Auth_Type);
 		this.xAuthHeader = cgr.get(X_Auth_Header);
 		this.xAuthTypeToken = cgr.get(X_Auth_Type_Token);
+		this.wxAppId = cgr.get(WX_APP_ID);
+		this.wxRedirectUri = cgr.get(WX_APP_REDIRECT_URI);
 	}
 
 	@Override
@@ -73,7 +82,11 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter{
 		if (method.getAnnotation(Authorization.class) != null){
 				if (srectStr == null ) {
 					logger.debug("Not Auth");
-		        		response.sendRedirect("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx2b64787e18521a4b&redirect_uri=http%3A%2F%2Fn8xbrp.natappfree.cc%2Fwxx%2FOAuth2%2Flogin&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect");
+		        		response.sendRedirect("https://open.weixin.qq.com/connect/oauth2/authorize?appid="
+		        				+this.wxAppId+
+		        				"&redirect_uri="
+		        				+	URLEncoder.encode(this.wxRedirectUri)+
+		        				"&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect");
 		        	return false;
 				}
 		}

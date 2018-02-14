@@ -9,6 +9,8 @@ public class Configurator
     public static final String RES_PUBLIC_CONFIG = "/staticconfig.pub.properties";
     public static final String RES_PRIVATE_CONFIG = "/staticconfig.properties";
 
+    public static final String RES_WX_CONFIG = "/wx.config.properties";
+    
     protected Properties publicProp;
     protected Properties prop;
 
@@ -48,6 +50,16 @@ public class Configurator
             this.publicProp.load(is);
             is.close();
 
+            is = new InputStreamReader(
+                    this.getClass()
+                        .getResourceAsStream(RES_WX_CONFIG),
+                    "utf-8"
+                );
+            
+            this.publicProp = new Properties(this.publicProp);
+            this.publicProp.load(is);
+            is.close();
+            
           // PRIVATE
             is = new InputStreamReader(
                 this.getClass()
@@ -58,6 +70,8 @@ public class Configurator
             this.prop = new Properties(this.publicProp);
             this.prop.load(is);
             is.close();
+            
+
         }
         catch (Exception ex)
         {

@@ -1,51 +1,47 @@
 package com.mrkt.wx.api;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.hibernate.SessionFactory;
-import org.jboss.jandex.TypeTarget.Usage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.mrkt.config.MvcConfig;
 import com.mrkt.config.RedisConfig;
-import com.mrkt.usr.core.UserActionImpl;
+import com.mrkt.sys.config.Configurator;
 import com.mrkt.usr.core.WxUserAction;
 import com.mrkt.wx.core.HttpRequest;
 import com.mrkt.wx.core.WxUserServiceImpl;
-import com.mrkt.wx.dao.WxUserRepository;
 import com.mrkt.wx.model.WxAccessToken;
 import com.mrkt.wx.model.WxUser;
 
 @RestController
 public class WxController {
 
-	public final static String token = "818181";
-	
-	private final static String  APPID = "wx2b64787e18521a4b";
-	
-	private final static String APPSRECT = "1aa0d1c44223eb93fb3799606e9e470d"; 
-	
-	private final static String GRANT_TYPE = "authorization_code";
-	
-	protected Logger logger = LoggerFactory.getLogger(WxController.class);
+	public final static String token;;
+	private final static String  APPID;
+	private final static String APPSRECT;
+	private final static String GRANT_TYPE;		
+	private static final String USER_CACHE = "user";
+
+	protected static Logger logger = LoggerFactory.getLogger(WxController.class);
 	
 	private HttpRequest httpRequest;
 	
-	private static final String USER_CACHE = "user";
+	private static Configurator cf;
+	
+	static{
+		cf = Configurator.getInstance();
+		cf.load();
+		
+		GRANT_TYPE = cf.get("wx.grant_type");
+		APPSRECT = cf.get("wx.app.srect");
+		APPID = cf.get("wx.app.id");
+		token = cf.get("wx.token");
+	}
 	
 	@Autowired
 	WxUserServiceImpl wxUserServiceImpl;
@@ -53,9 +49,7 @@ public class WxController {
 	@Autowired
 	@Qualifier("userActionImpl")
 	WxUserAction userAction;
-//	
-//	@Autowired
-//	MvcConfig mvcConfig;
+
 	@Autowired
 	RedisConfig redisConfig;
 	
@@ -71,12 +65,10 @@ public class WxController {
 			@RequestParam(required=false, name="echostr") String echostr
 			){
 		String[] arr = new String[]{timestamp, nonce, token};
-		Arrays.sort(arr);
 		StringBuffer temp = new StringBuffer();
 		for (String string : arr) {
 			temp.append(string);
 		}
-		System.out.println(temp);
 		return echostr;
 	}
 	
@@ -85,6 +77,7 @@ public class WxController {
 			@RequestParam(name="code") String code,
 			@RequestParam(name="state", required=false) String state
 			){
+		logger.info("innnnn");
 		String response = httpRequest.doGet("https://api.weixin.qq.com/sns/oauth2/access_token?appid="+APPID+"&secret="+APPSRECT+"&code="+code+"&grant_type=authorization_code");
 		WxUser wxuser = null;
 		WxAccessToken accessToken = JSONObject.parseObject(response, WxAccessToken.class);
@@ -96,7 +89,6 @@ public class WxController {
 		}
 		if (accessToken.getAccess_token() != null && accessToken.getOpenid()!=null) {
 			String resp = httpRequest.doGet("https://api.weixin.qq.com/sns/userinfo?access_token="+accessToken.getAccess_token()+"&openid="+accessToken.getOpenid()+"&lang=zh_CN");
-			
 			wxuser = JSON.parseObject(resp, WxUser.class);
 			userAction.register(wxuser);
 		}
