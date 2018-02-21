@@ -3,6 +3,7 @@ package com.mrkt.product.core;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.criteria.Predicate;
 
@@ -21,13 +22,17 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.mrkt.product.dao.ProductRepository;
+import com.mrkt.product.model.Image;
 import com.mrkt.product.model.Product;
+import com.mrkt.usr.dao.UserRepository;
 
 @Service(value="productService")
 public class ProductServiceImpl implements IProductService {
 
 	@Autowired
 	private ProductRepository productRepository;
+	@Autowired
+	private UserRepository userRepository;
 	
 	@SuppressWarnings("rawtypes")
 	@Autowired
@@ -45,14 +50,27 @@ public class ProductServiceImpl implements IProductService {
 	@Override
 	public void saveOrUpdate(Product entity){
 		if (entity.getId() != null && entity.getId() >= 0) {
+			Product po = productRepository.findOne(entity.getId());
+			
 			// 更新商品信息
+			po.setName(entity.getName());
+			po.setDesc(entity.getDesc());
+			po.setPrice((entity.getPrice() != null) && (entity.getPrice() >= 0) ? entity.getPrice() : 0);
+			po.setPtype(entity.getPtype());
+			po.setCount(entity.getCount());
+			po.setImages(entity.getImages());
+			
+			entity = po;
 			entity.setTmUpdated(new Date());
+			
 		} else {
 			// 发布商品
 			entity.setState(1);// 状态初始化为发布
 			entity.setCollection(0);// 收藏数为0
 			entity.setLikes(0);// 点赞数为0
+			entity.setViews(0);// 浏览量为0
 			entity.setTmCreated(new Date());
+			entity.setMrktUser(userRepository.findOne(entity.getMrktUser().getUid()));
 		}
 		productRepository.save(entity);
 	}
@@ -70,6 +88,7 @@ public class ProductServiceImpl implements IProductService {
 	             * @return 断言
 	             */
 				List<Predicate> predicates = new ArrayList<>();
+				predicates.add(builder.equal(root.get("state").as(Integer.class), 1));// 状态为1的商品，表示待售
 				if (type != null && type.trim().length() > 0) {
 					predicates.add(builder.equal(root.get("ptype").as(String.class), type));
 				}

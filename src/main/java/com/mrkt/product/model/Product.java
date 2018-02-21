@@ -2,7 +2,10 @@ package com.mrkt.product.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -40,8 +44,8 @@ public class Product implements Serializable{
 	@Column(name="product_price")
 	private Double price;         // 价格
 	
-	@Column(name="product_image")
-	private String image;         // 图片路径
+//	@Column(name="product_image") // 改用表映射多张图片
+//	private String image;         // 图片路径
 	
 	@Column(name="product_views")
 	private Integer views;        // 浏览量
@@ -75,6 +79,10 @@ public class Product implements Serializable{
 	@ManyToOne
 	@JoinColumn(name="uid")
 	private UserBase mrktUser;    // 多对一关联用户表
+	
+	@OneToMany(cascade=CascadeType.ALL)
+	@JoinColumn(name="product_id")
+	private Set<Image> images = new HashSet<>();
 
 	public Product() {
 		super();
@@ -82,7 +90,7 @@ public class Product implements Serializable{
 
 	@Override
 	public String toString() {
-		return "Product [id=" + id + ", name=" + name + ", desc=" + desc + ", price=" + price + ", image=" + image
+		return "Product [id=" + id + ", name=" + name + ", desc=" + desc + ", price=" + price
 				+ ", views=" + views + ", collection=" + collection + ", likes=" + likes + ", ptype=" + ptype
 				+ ", traWay=" + traWay + ", count=" + count + ", state=" + state + ", tmCreated=" + tmCreated
 				+ ", tmUpdated=" + tmUpdated + ", mrktUser=" + mrktUser + "]";
@@ -145,13 +153,13 @@ public class Product implements Serializable{
 		this.price = price;
 	}
 
-	public String getImage() {
-		return image;
-	}
-
-	public void setImage(String image) {
-		this.image = image;
-	}
+//	public String getImage() {
+//		return image;
+//	}
+//
+//	public void setImage(String image) {
+//		this.image = image;
+//	}
 
 	public Integer getViews() {
 		return views;
@@ -233,8 +241,12 @@ public class Product implements Serializable{
 		this.mrktUser = mrktUser;
 	}
 
-	public static long getSerialversionuid() {
-		return serialVersionUID;
+	public Set<Image> getImages() {
+		return images;
+	}
+
+	public void setImages(Set<Image> images) {
+		this.images = images;
 	}
 	
 }

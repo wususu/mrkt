@@ -22,7 +22,7 @@ public interface IProductService {
 	
 	/**
 	 * 新增或修改记录保存
-	 * 上架商品/修改商品信息/收藏/浏览量/点赞
+	 * 上架商品/修改商品信息
 	 * @param entity
 	 */
 	void saveOrUpdate(Product entity);
