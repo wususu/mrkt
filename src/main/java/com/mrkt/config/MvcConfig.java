@@ -1,6 +1,7 @@
 package com.mrkt.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
@@ -19,11 +20,17 @@ public class MvcConfig extends WebMvcConfigurerAdapter{
 
 	@Autowired
 	private AuthorizationInterceptor authorizationInterceptor;
+	
+	@Bean
+	public AuthorizationInterceptor getAuthorizationInterceptor() {
+		return new AuthorizationInterceptor();
+	}
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		// TODO Auto-generated method stub
-		registry.addInterceptor(new AuthorizationInterceptor());
+		registry.addInterceptor(authorizationInterceptor);
 	}
+	
 	
 }
