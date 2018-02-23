@@ -209,19 +209,9 @@ public class ProductController {
 	/**
 	 * 收藏商品
 	 */
-	@RequestMapping(value="/products/{id}/collection", method=RequestMethod.PUT)
-	public String addCollections(
-			@PathVariable("id") Long id,
-			@RequestParam("collection") Integer collection) {
-		if (collection == 1 || collection == -1) {
-			Product entity = productService.findOne(id);
-			int currColl = entity.getCollection() + collection;// 当前点赞数
-			entity.setCollection(currColl < 0 ? 0 : currColl);
-			productService.saveOrUpdate(entity);
-		} else {
-			throw new RuntimeException("收藏数功能异常");
-		}
-		return "ok";
+	@RequestMapping(value="/products/{id}/collection", method=RequestMethod.POST)
+	public String addCollections(@PathVariable("id") Long id) {
+		return "success";
 	}
 	
 }

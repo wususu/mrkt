@@ -86,6 +86,10 @@ public class Product implements Serializable{
 	@JoinColumn(name="product_id")
 	private Set<Image> images = new HashSet<>(); // 一对多关联图片
 	
+	@OneToMany(cascade=CascadeType.ALL)
+	@JoinColumn(name="product_id")
+	private Set<Comment> comments = new HashSet<>(); // 一对多关联评论
+	
 	/**
 	 * 冗余字段，标志当前用户是否对该商品赞过，不存入数据库
 	 */
@@ -101,7 +105,8 @@ public class Product implements Serializable{
 		return "Product [id=" + id + ", name=" + name + ", desc=" + desc + ", price=" + price + ", views=" + views
 				+ ", collection=" + collection + ", likes=" + likes + ", ptype=" + ptype + ", traWay=" + traWay
 				+ ", count=" + count + ", state=" + state + ", tmCreated=" + tmCreated + ", tmUpdated=" + tmUpdated
-				+ ", mrktUser=" + mrktUser + ", images=" + images + ", isLike=" + isLike + "]";
+				+ ", mrktUser=" + mrktUser + ", images=" + images + ", comments=" + comments + ", isLike=" + isLike
+				+ "]";
 	}
 
 	@Override
@@ -160,14 +165,6 @@ public class Product implements Serializable{
 	public void setPrice(Double price) {
 		this.price = price;
 	}
-
-//	public String getImage() {
-//		return image;
-//	}
-//
-//	public void setImage(String image) {
-//		this.image = image;
-//	}
 
 	public Integer getViews() {
 		return views;
@@ -264,5 +261,35 @@ public class Product implements Serializable{
 	public void setIsLike(Boolean isLike) {
 		this.isLike = isLike;
 	}
+
+	public Set<Comment> getComments() {
+		return comments;
+	}
+
+	public void setComments(Set<Comment> comments) {
+		this.comments = comments;
+	}
 	
+	/**
+	 * 添加评论
+	 * @param comment
+	 */
+	public void addComment(Comment comment) {
+		this.comments.add(comment);
+//		this.commentSize = this.comments.size();
+	}
+	
+	/**
+	 * 删除评论
+	 * @param comment
+	 */
+	public void removeComment(Long commentId) {
+		for (Comment comment : comments)
+			if (comment.getId() == commentId) {
+				this.comments.remove(comment);
+				break;
+			}
+		
+//		this.commentSize = this.comments.size();
+	}
 }

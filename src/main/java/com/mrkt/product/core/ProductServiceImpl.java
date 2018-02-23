@@ -20,7 +20,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.mrkt.product.dao.CommentRepository;
 import com.mrkt.product.dao.ProductRepository;
+import com.mrkt.product.model.Comment;
 import com.mrkt.product.model.Product;
 import com.mrkt.usr.ThisUser;
 import com.mrkt.usr.dao.UserRepository;
@@ -33,6 +35,8 @@ public class ProductServiceImpl implements IProductService {
 	private ProductRepository productRepository;
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private CommentRepository commentRepository;
 	
 	@SuppressWarnings("rawtypes")
 	@Autowired
@@ -164,11 +168,34 @@ public class ProductServiceImpl implements IProductService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void removeLikes(Long id) {
-		redisTemplate.boundSetOps("pro_like_" + id).remove(
-				ThisUser.get().getUid());
-		Product entity = productRepository.findOne(id);
-		entity.setLikes(entity.getLikes() - 1);
-		productRepository.saveAndFlush(entity);
+		try {
+			Long result = redisTemplate.boundSetOps("pro_like_" + id).remove(
+					ThisUser.get().getUid());
+			if (result == null || result == 0)
+				throw new IllegalAccessException("用户没有点赞过该商品");
+			Product entity = productRepository.findOne(id);
+			entity.setLikes(entity.getLikes() - 1);
+			productRepository.saveAndFlush(entity);
+		} catch (Exception e) {
+			logger.info("用户没有点赞过该商品");
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public Product addComment(Long productId, String commentContent) {
+		Product originalProduct = productRepository.findOne(productId);
+		UserBase UserBase = ThisUser.get();
+		Comment comment = new Comment(UserBase, commentContent);
+		originalProduct.addComment(comment);
+		return productRepository.save(originalProduct);
+	}
+
+	@Override
+	public void removeComment(Long productId, Long commentId) {
+		Product originalProduct = productRepository.findOne(productId);
+		originalProduct.removeComment(commentId);
+		productRepository.save(originalProduct);
 	}
 
 }

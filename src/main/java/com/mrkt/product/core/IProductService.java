@@ -73,4 +73,18 @@ public interface IProductService {
 	 */
 	void removeLikes(Long id);
 
+	/**
+	 * 添加商品留言
+	 * @param productId
+	 * @param commentContent
+	 * @return
+	 */
+	public Product addComment(Long productId, String commentContent);
+	
+	/**
+	 * 删除商品留言
+	 * @param productId
+	 * @param commentId
+	 */
+	public void removeComment(Long productId, Long commentId);
 }
