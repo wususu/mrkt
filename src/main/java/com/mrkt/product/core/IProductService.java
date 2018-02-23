@@ -72,6 +72,18 @@ public interface IProductService {
 	 * @param id
 	 */
 	void removeLikes(Long id);
+	
+	/**
+	 * 收藏指定商品
+	 * @param id
+	 */
+	void addCollection(Long id);
+	
+	/**
+	 * 取消收藏
+	 * @param id
+	 */
+	void removeCollection(Long id);
 
 	/**
 	 * 添加商品留言

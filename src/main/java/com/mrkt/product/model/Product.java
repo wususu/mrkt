@@ -19,7 +19,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import com.mrkt.usr.model.UserBase;
 
 /**
@@ -94,7 +93,12 @@ public class Product implements Serializable{
 	 * 冗余字段，标志当前用户是否对该商品赞过，不存入数据库
 	 */
 	@Transient
-	private Boolean isLike;
+	private Boolean isLike = false;
+	/**
+	 * 冗余字段，标志当前用户是否收藏过该商品，不存入数据库
+	 */
+	@Transient
+	private Boolean isColl = false;
 
 	public Product() {
 		super();
@@ -106,7 +110,7 @@ public class Product implements Serializable{
 				+ ", collection=" + collection + ", likes=" + likes + ", ptype=" + ptype + ", traWay=" + traWay
 				+ ", count=" + count + ", state=" + state + ", tmCreated=" + tmCreated + ", tmUpdated=" + tmUpdated
 				+ ", mrktUser=" + mrktUser + ", images=" + images + ", comments=" + comments + ", isLike=" + isLike
-				+ "]";
+				+ ", isColl=" + isColl + "]";
 	}
 
 	@Override
@@ -270,6 +274,14 @@ public class Product implements Serializable{
 		this.comments = comments;
 	}
 	
+	public Boolean getIsColl() {
+		return isColl;
+	}
+
+	public void setIsColl(Boolean isColl) {
+		this.isColl = isColl;
+	}
+
 	/**
 	 * 添加评论
 	 * @param comment

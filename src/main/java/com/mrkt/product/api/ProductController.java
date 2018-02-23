@@ -211,7 +211,17 @@ public class ProductController {
 	 */
 	@RequestMapping(value="/products/{id}/collection", method=RequestMethod.POST)
 	public String addCollections(@PathVariable("id") Long id) {
+		productService.addCollection(id);
 		return "success";
 	}
 	
+	/**
+	 * 取消收藏
+	 */
+	@Authorization
+	@RequestMapping(value="/products/{id}/collection", method=RequestMethod.DELETE)
+	public String removeCollection(@PathVariable("id") Long id) {
+		productService.removeCollection(id);
+		return "success";
+	}
 }

@@ -20,7 +20,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.mrkt.product.dao.CommentRepository;
 import com.mrkt.product.dao.ProductRepository;
 import com.mrkt.product.model.Comment;
 import com.mrkt.product.model.Product;
@@ -35,8 +34,6 @@ public class ProductServiceImpl implements IProductService {
 	private ProductRepository productRepository;
 	@Autowired
 	private UserRepository userRepository;
-	@Autowired
-	private CommentRepository commentRepository;
 	
 	@SuppressWarnings("rawtypes")
 	@Autowired
@@ -53,9 +50,12 @@ public class ProductServiceImpl implements IProductService {
 		entity.setViews(entity.getViews()+1);
 		entity = productRepository.save(entity);
 		UserBase currUser = null;
-		if ((currUser = ThisUser.get()) != null)
+		if ((currUser = ThisUser.get()) != null) {
 			entity.setIsLike(redisTemplate.boundSetOps("pro_like_" + id).
 						isMember(currUser.getUid()));
+			entity.setIsColl(redisTemplate.boundSetOps("pro_coll_" + id).
+						isMember(currUser.getUid()));
+		}
 		return entity;
 	}
 	
@@ -110,11 +110,13 @@ public class ProductServiceImpl implements IProductService {
 		if (orderWay == null || orderWay.trim().length() <= 0) orderWay = "tmCreated";// 默认为最新排序
 		Pageable pageable = new PageRequest(currPage, pageSize, new Sort(new Order(Direction.DESC, orderWay)));
 		Page<Product> page = productRepository.findAll(sp, pageable);
-		// 处理当前用户对于商品的点赞情况
+		// 处理当前用户对于商品的点赞情况和收藏情况
 		UserBase currUser = null;
 		if ((currUser = ThisUser.get()) != null)
 			for (Product product : page) {
 				product.setIsLike(redisTemplate.boundSetOps("pro_like_" + product.getId()).
+							isMember(currUser.getUid()));
+				product.setIsLike(redisTemplate.boundSetOps("pro_coll_" + product.getId()).
 							isMember(currUser.getUid()));
 			}
 		
@@ -178,6 +180,44 @@ public class ProductServiceImpl implements IProductService {
 			productRepository.saveAndFlush(entity);
 		} catch (Exception e) {
 			logger.info("用户没有点赞过该商品");
+			e.printStackTrace();
+		}
+	}
+	@SuppressWarnings("unchecked")
+	@Override
+	public void addCollection(Long id) {
+		try {
+			Long result = redisTemplate.boundSetOps("pro_coll_" + id).add(
+					ThisUser.get().getUid());
+			if (result == null || result == 0)
+				throw new IllegalAccessException("用户已经收藏过该商品");
+			// 用户 收藏 商品，多对多，换成两个set存储在redis中
+			redisTemplate.boundSetOps("user_coll_" + ThisUser.get().getUid()).add(id);
+			// 收藏数加1
+			Product entity = productRepository.findOne(id);
+			entity.setCollection(entity.getCollection() + 1);
+			productRepository.saveAndFlush(entity);
+		} catch (Exception e) {
+			logger.info("用户已经收藏过该商品");
+			e.printStackTrace();
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public void removeCollection(Long id) {
+		try {
+			Long result = redisTemplate.boundSetOps("pro_coll_" + id).remove(
+					ThisUser.get().getUid());
+			if (result == null || result == 0)
+				throw new IllegalAccessException("用户没有收藏过该商品");
+			// 用户 收藏 商品，多对多，换成两个set存储在redis中
+			redisTemplate.boundSetOps("user_coll_" + ThisUser.get().getUid()).remove(id);
+			Product entity = productRepository.findOne(id);
+			entity.setCollection(entity.getCollection() - 1);
+			productRepository.saveAndFlush(entity);
+		} catch (Exception e) {
+			logger.info("用户没有收藏过该商品");
 			e.printStackTrace();
 		}
 	}
