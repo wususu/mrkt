@@ -31,7 +31,7 @@ public interface IProductService {
 	 * 根据类型、最新/最热、关键词搜索展示商品，
 	 * @param currPage 当前页
 	 * @param type 商品类型
-	 * @param orderWay 排序方式，最新（默认）发布时间；最热，收藏数
+	 * @param orderWay 排序方式，最新（默认）发布时间；最热，赞/浏览量？
 	 * @param keywords 关键词
 	 * @return
 	 */
@@ -60,5 +60,17 @@ public interface IProductService {
 	 * @param ids
 	 */
 	void deleteAll(Long[] ids);
+	
+	/**
+	 * 点赞指定商品
+	 * @param id
+	 */
+	void addLikes(Long id);
+	
+	/**
+	 * 取消点赞
+	 * @param id
+	 */
+	void removeLikes(Long id);
 
 }

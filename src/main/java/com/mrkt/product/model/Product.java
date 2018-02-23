@@ -17,7 +17,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.mrkt.usr.model.UserBase;
 
 /**
@@ -48,13 +50,13 @@ public class Product implements Serializable{
 //	private String image;         // 图片路径
 	
 	@Column(name="product_views")
-	private Integer views;        // 浏览量
+	private Integer views = 0;        // 浏览量
 	
 	@Column(name="product_collection")
-	private Integer collection;   // 收藏数
+	private Integer collection = 0;   // 收藏数
 	
 	@Column(name="product_likes")
-	private Integer likes;        // 点赞数
+	private Integer likes = 0;        // 点赞数
 	
 	@Column(name="product_type")
 	private String ptype;         // 商品类型
@@ -82,7 +84,13 @@ public class Product implements Serializable{
 	
 	@OneToMany(cascade=CascadeType.ALL)
 	@JoinColumn(name="product_id")
-	private Set<Image> images = new HashSet<>();
+	private Set<Image> images = new HashSet<>(); // 一对多关联图片
+	
+	/**
+	 * 冗余字段，标志当前用户是否对该商品赞过，不存入数据库
+	 */
+	@Transient
+	private Boolean isLike;
 
 	public Product() {
 		super();
@@ -90,10 +98,10 @@ public class Product implements Serializable{
 
 	@Override
 	public String toString() {
-		return "Product [id=" + id + ", name=" + name + ", desc=" + desc + ", price=" + price
-				+ ", views=" + views + ", collection=" + collection + ", likes=" + likes + ", ptype=" + ptype
-				+ ", traWay=" + traWay + ", count=" + count + ", state=" + state + ", tmCreated=" + tmCreated
-				+ ", tmUpdated=" + tmUpdated + ", mrktUser=" + mrktUser + "]";
+		return "Product [id=" + id + ", name=" + name + ", desc=" + desc + ", price=" + price + ", views=" + views
+				+ ", collection=" + collection + ", likes=" + likes + ", ptype=" + ptype + ", traWay=" + traWay
+				+ ", count=" + count + ", state=" + state + ", tmCreated=" + tmCreated + ", tmUpdated=" + tmUpdated
+				+ ", mrktUser=" + mrktUser + ", images=" + images + ", isLike=" + isLike + "]";
 	}
 
 	@Override
@@ -247,6 +255,14 @@ public class Product implements Serializable{
 
 	public void setImages(Set<Image> images) {
 		this.images = images;
+	}
+
+	public Boolean getIsLike() {
+		return isLike;
+	}
+
+	public void setIsLike(Boolean isLike) {
+		this.isLike = isLike;
 	}
 	
 }

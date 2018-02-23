@@ -3,7 +3,6 @@ package com.mrkt.product.core;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.criteria.Predicate;
 
@@ -22,9 +21,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.mrkt.product.dao.ProductRepository;
-import com.mrkt.product.model.Image;
 import com.mrkt.product.model.Product;
+import com.mrkt.usr.ThisUser;
 import com.mrkt.usr.dao.UserRepository;
+import com.mrkt.usr.model.UserBase;
 
 @Service(value="productService")
 public class ProductServiceImpl implements IProductService {
@@ -37,13 +37,21 @@ public class ProductServiceImpl implements IProductService {
 	@SuppressWarnings("rawtypes")
 	@Autowired
 	@Qualifier("redisTemplate")
-	private RedisTemplate redisTemplates;
+	private RedisTemplate redisTemplate;
 	
 	private final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public Product findOne(Long id) {
 		Product entity = productRepository.findOne(id);
+		// 查询一次具体商品详情浏览量加1
+		entity.setViews(entity.getViews()+1);
+		entity = productRepository.save(entity);
+		UserBase currUser = null;
+		if ((currUser = ThisUser.get()) != null)
+			entity.setIsLike(redisTemplate.boundSetOps("pro_like_" + id).
+						isMember(currUser.getUid()));
 		return entity;
 	}
 	
@@ -64,17 +72,15 @@ public class ProductServiceImpl implements IProductService {
 			entity.setTmUpdated(new Date());
 			
 		} else {
-			// 发布商品
-			entity.setState(1);// 状态初始化为发布
-			entity.setCollection(0);// 收藏数为0
-			entity.setLikes(0);// 点赞数为0
-			entity.setViews(0);// 浏览量为0
+			// 发布商品，初始化基本信息
+			entity.setState(1);// 状态为发布
 			entity.setTmCreated(new Date());
 			entity.setMrktUser(userRepository.findOne(entity.getMrktUser().getUid()));
 		}
 		productRepository.save(entity);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public Page<Product> findPage(int currPage, String type, String orderWay, String keywords) {
 		final int pageSize = 10;
@@ -100,6 +106,13 @@ public class ProductServiceImpl implements IProductService {
 		if (orderWay == null || orderWay.trim().length() <= 0) orderWay = "tmCreated";// 默认为最新排序
 		Pageable pageable = new PageRequest(currPage, pageSize, new Sort(new Order(Direction.DESC, orderWay)));
 		Page<Product> page = productRepository.findAll(sp, pageable);
+		// 处理当前用户对于商品的点赞情况
+		UserBase currUser = null;
+		if ((currUser = ThisUser.get()) != null)
+			for (Product product : page) {
+				product.setIsLike(redisTemplate.boundSetOps("pro_like_" + product.getId()).
+							isMember(currUser.getUid()));
+			}
 		
 		return page;
 	}
@@ -128,6 +141,34 @@ public class ProductServiceImpl implements IProductService {
 		for (Long id : ids) {
 			this.delete(id);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void addLikes(Long id) {
+		try {
+			Long result = redisTemplate.boundSetOps("pro_like_" + id).add(
+					ThisUser.get().getUid());
+			if (result == null || result == 0)
+				throw new IllegalAccessException("用户已经点过赞");
+			// 点赞数加1
+			Product entity = productRepository.findOne(id);
+			entity.setLikes(entity.getLikes() + 1);
+			productRepository.saveAndFlush(entity);
+		} catch (Exception e) {
+			logger.info("用户已经点过赞");
+			e.printStackTrace();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void removeLikes(Long id) {
+		redisTemplate.boundSetOps("pro_like_" + id).remove(
+				ThisUser.get().getUid());
+		Product entity = productRepository.findOne(id);
+		entity.setLikes(entity.getLikes() - 1);
+		productRepository.saveAndFlush(entity);
 	}
 
 }

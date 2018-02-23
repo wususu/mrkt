@@ -19,9 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSON;
+import com.mrkt.authorization.annotation.Authorization;
 import com.mrkt.product.core.IProductService;
 import com.mrkt.product.model.Image;
 import com.mrkt.product.model.Product;
+import com.mrkt.usr.ThisUser;
 import com.mrkt.usr.model.UserBase;
 
 /**
@@ -32,7 +34,7 @@ import com.mrkt.usr.model.UserBase;
  * @since		2018/02/19 13:16:21
  */
 @RestController
-public class ProductCotroller {
+public class ProductController {
 
 	@Autowired
 	private IProductService productService;
@@ -42,14 +44,21 @@ public class ProductCotroller {
 	/**
 	 * 查询商品信息
 	 */
+	@Authorization
 	@RequestMapping(value="/products/{id}", method=RequestMethod.GET)
 	public String getProduct(@PathVariable("id") Long id) {
 		Product entity = productService.findOne(id);
+		logger.info("thisUser: " + ThisUser.get());
 		return JSON.toJSONString(entity);
 	}
 	
 	/**
 	 * 分页展示商品，搜索商品
+	 * @param currPage
+	 * @param type 商品类型
+	 * @param orderWay tmCreated(按最新排序) or views(按浏览量排序)
+	 * @param keywords 搜索的关键词
+	 * @return
 	 */
 	@RequestMapping(value="/products/all", method=RequestMethod.GET)
 	public String getProducts(
@@ -73,6 +82,7 @@ public class ProductCotroller {
 	 * @param uid
 	 * @return
 	 */
+	@Authorization
 	@RequestMapping(value="/products", method=RequestMethod.POST)
 	public String addProduct(HttpServletRequest request,
 			@RequestParam("name") String name,
@@ -81,8 +91,7 @@ public class ProductCotroller {
 			@RequestParam("images") MultipartFile[] images,
 			@RequestParam("ptype") String ptype,
 			@RequestParam("tra_way") String traWay,
-			@RequestParam("count") Integer count,
-			@RequestParam("uid") Long uid
+			@RequestParam("count") Integer count
 			) {
 		Product entity = new Product();
 		entity.setName(name);
@@ -91,9 +100,7 @@ public class ProductCotroller {
 		entity.setPtype(ptype);
 		entity.setTraWay(traWay);
 		entity.setCount(count);
-		UserBase user = new UserBase();
-		user.setUid(uid);
-		entity.setMrktUser(user);
+		entity.setMrktUser(ThisUser.get());
 		// 处理图片
 		String rootpath = request.getServletContext().getRealPath("/");// 根路径
 		Set<Image> imageSet = new HashSet<>();
@@ -123,6 +130,7 @@ public class ProductCotroller {
 	/**
 	 * 修改商品信息
 	 */
+	@Authorization
 	@RequestMapping(value="/products/{id}", method=RequestMethod.PUT)
 	public String updateProduct(HttpServletRequest request,
 			@PathVariable("id") Long id,
@@ -170,31 +178,32 @@ public class ProductCotroller {
 	/**
 	 * 下架商品
 	 */
+	@Authorization
 	@RequestMapping(value="/products/{id}", method=RequestMethod.DELETE)
 	public String cancelProduct(@PathVariable("id") Long id) {
 		productService.cancel(id);
-		return "ok";
+		return "success";
 	}
 	
 	
 	/**
-	 * 点赞(likes == 1)或者取消赞(likes == -1)
+	 * 点赞
 	 */
-	@RequestMapping(value="/products/{id}/likes", method=RequestMethod.PUT)
-	public String addLikes(
-			@PathVariable("id") Long id,
-			@RequestParam("likes") Integer likes,
-			@RequestParam("uid") Long uid) {
-		if (likes == 1 || likes == -1) {
-			Product entity = productService.findOne(id);
-			int currLikes = entity.getLikes() + likes;// 当前点赞数
-			entity.setLikes(currLikes < 0 ? 0 : currLikes);
-			productService.saveOrUpdate(entity);
-		} else {
-			throw new RuntimeException("点赞功能异常");
-		}
-		
-		return "ok";
+	@Authorization
+	@RequestMapping(value="/products/{id}/likes", method=RequestMethod.POST)
+	public String addLikes(@PathVariable("id") Long id) {
+		productService.addLikes(id);
+		return "success";
+	}
+	
+	/**
+	 * 取消点赞
+	 */
+	@Authorization
+	@RequestMapping(value="/products/{id}/likes", method=RequestMethod.DELETE)
+	public String removeLikes(@PathVariable("id") Long id) {
+		productService.removeLikes(id);
+		return "success";
 	}
 	
 	/**
@@ -212,17 +221,6 @@ public class ProductCotroller {
 		} else {
 			throw new RuntimeException("收藏数功能异常");
 		}
-		return "ok";
-	}
-	
-	/**
-	 * 浏览量
-	 */
-	@RequestMapping(value="/products/{id}/views", method=RequestMethod.PUT)
-	public String addViews(@PathVariable("id") Long id) {
-		Product entity = productService.findOne(id);
-		entity.setViews(entity.getViews());
-		productService.saveOrUpdate(entity);
 		return "ok";
 	}
 	
