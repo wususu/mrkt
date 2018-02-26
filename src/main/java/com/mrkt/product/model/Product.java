@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -43,7 +44,7 @@ public class Product implements Serializable{
 	private String desc;          // 商品描述
 	
 	@Column(name="product_price")
-	private Double price;         // 价格
+	private Double price=0d;         // 价格
 	
 //	@Column(name="product_image") // 改用表映射多张图片
 //	private String image;         // 图片路径
@@ -67,7 +68,7 @@ public class Product implements Serializable{
 	private Integer count;        // 商品库存/余量，因为二手市场，全默认为1
 	
 	@Column(name="product_state")
-	private Integer state;        // 商品状态，0下架/删除；1发布；2已售出；
+	private Integer state;        // 商品状态，0下架/删除；1发布；2被预定；3已售出；
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="product_tm_created")
@@ -81,11 +82,11 @@ public class Product implements Serializable{
 	@JoinColumn(name="uid")
 	private UserBase mrktUser;    // 多对一关联用户表
 	
-	@OneToMany(cascade=CascadeType.ALL)
+	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name="product_id")
 	private Set<Image> images = new HashSet<>(); // 一对多关联图片
 	
-	@OneToMany(cascade=CascadeType.ALL)
+	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name="product_id")
 	private Set<Comment> comments = new HashSet<>(); // 一对多关联评论
 	
