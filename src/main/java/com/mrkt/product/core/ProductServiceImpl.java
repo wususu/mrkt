@@ -3,6 +3,7 @@ package com.mrkt.product.core;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.criteria.Predicate;
 
@@ -116,7 +117,7 @@ public class ProductServiceImpl implements IProductService {
 			for (Product product : page) {
 				product.setIsLike(redisTemplate.boundSetOps("pro_like_" + product.getId()).
 							isMember(currUser.getUid()));
-				product.setIsLike(redisTemplate.boundSetOps("pro_coll_" + product.getId()).
+				product.setIsColl(redisTemplate.boundSetOps("pro_coll_" + product.getId()).
 							isMember(currUser.getUid()));
 			}
 		
@@ -236,6 +237,44 @@ public class ProductServiceImpl implements IProductService {
 		Product originalProduct = productRepository.findOne(productId);
 		originalProduct.removeComment(commentId);
 		productRepository.save(originalProduct);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Product> getMine() {
+		Specification<Product> sp = (root, query, builder) -> {
+			List<Predicate> predicates = new ArrayList<>();
+			predicates.add(builder.equal(root.get("state").as(Integer.class), 1));
+			predicates.add(builder.equal(root.get("mrktUser").as(UserBase.class), ThisUser.get()));
+			return builder.and(predicates.toArray(new Predicate[predicates.size()]));
+		};
+		List<Product> products = productRepository.findAll(sp);
+		// 处理当前用户对于商品的点赞情况和收藏情况
+		final UserBase currUser = ThisUser.get();
+		if (currUser != null)
+			products.forEach(product -> {
+				product.setIsLike(
+						redisTemplate.boundSetOps("pro_like_" + product.getId()).isMember(currUser.getUid()));
+				product.setIsColl(true);
+			});
+		return products;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Product> getCollection() {
+		Set<Long> ids = redisTemplate.boundSetOps("user_coll_" + ThisUser.get().getUid())
+					 				 .members();
+		List<Product> products = productRepository.findAll(ids);
+		// 处理当前用户对于商品的点赞情况和收藏情况
+		final UserBase currUser = ThisUser.get();
+		if (currUser != null)
+			products.forEach(product -> {
+				product.setIsLike(
+						redisTemplate.boundSetOps("pro_like_" + product.getId()).isMember(currUser.getUid()));
+				product.setIsColl(true);
+			});
+		return products;
 	}
 
 }

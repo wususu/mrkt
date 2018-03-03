@@ -1,5 +1,7 @@
 package com.mrkt.product.core;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 
 import com.mrkt.product.model.Product;
@@ -91,12 +93,20 @@ public interface IProductService {
 	 * @param commentContent
 	 * @return
 	 */
-	public Product addComment(Long productId, String commentContent);
+	Product addComment(Long productId, String commentContent);
 	
 	/**
 	 * 删除商品留言
 	 * @param productId
 	 * @param commentId
 	 */
-	public void removeComment(Long productId, Long commentId);
+	void removeComment(Long productId, Long commentId);
+
+	/**
+	 * 获取我发布的商品，product.state=1
+	 * @return
+	 */
+	List<Product> getMine();
+
+	List<Product> getCollection();
 }

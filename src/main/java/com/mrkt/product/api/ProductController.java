@@ -24,7 +24,6 @@ import com.mrkt.product.core.IProductService;
 import com.mrkt.product.model.Image;
 import com.mrkt.product.model.Product;
 import com.mrkt.usr.ThisUser;
-import com.mrkt.usr.model.UserBase;
 
 /**
  * @ClassName	ProductCotroller	
@@ -223,5 +222,25 @@ public class ProductController {
 	public String removeCollection(@PathVariable("id") Long id) {
 		productService.removeCollection(id);
 		return "success";
+	}
+	
+	/**
+	 * 获取我发布的商品
+	 * @return
+	 */
+	@Authorization
+	@RequestMapping(value="/products/mine", method=RequestMethod.GET)
+	public String getMine() {
+		return JSON.toJSONString(productService.getMine());
+	}
+	
+	/**
+	 * 获取我收藏的商品
+	 * @return
+	 */
+	@Authorization
+	@RequestMapping(value="/products/collection", method=RequestMethod.GET)
+	public String getCollection() {
+		return JSON.toJSONString(productService.getCollection());
 	}
 }
