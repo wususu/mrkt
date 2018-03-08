@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alibaba.fastjson.JSON;
 import com.mrkt.authorization.annotation.Authorization;
 import com.mrkt.product.core.ICommentService;
 import com.mrkt.product.core.IProductService;
 import com.mrkt.product.model.Comment;
 import com.mrkt.product.model.Product;
+import com.mrkt.product.model.Response;
 import com.mrkt.usr.ThisUser;
 import com.mrkt.usr.model.UserBase;
 
@@ -39,7 +39,7 @@ public class CommentController {
 	 * @return
 	 */
 	@RequestMapping(method=RequestMethod.GET)
-	public String listComments(
+	public Set<Comment> listComments(
 			@RequestParam(value="productId",required=true) Long productId) {
 		Product Product = productService.findOne(productId);
 		Set<Comment> comments = Product.getComments();
@@ -52,7 +52,7 @@ public class CommentController {
 						user.getUid().equals(comment.getUser().getUid()));
 			}
 		
-		return JSON.toJSONString(comments);
+		return comments;
 	}
 	
 	/**
@@ -63,17 +63,11 @@ public class CommentController {
 	 */
 	@Authorization
 	@RequestMapping(method=RequestMethod.POST)
-	public String createComment(
+	public Response createComment(
 			@RequestParam(value="productId") Long productId, 
-			@RequestParam(value="commentContent") String commentContent) {
-		try {
-			productService.addComment(productId, commentContent);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return "error";
-		}
-		
-		return "success";
+			@RequestParam(value="commentContent") String commentContent) throws Exception {
+		productService.addComment(productId, commentContent);
+		return new Response(true, "发表评论成功");
 	}
 	
 	/**
@@ -82,22 +76,18 @@ public class CommentController {
 	 */
 	@Authorization
 	@RequestMapping(value="/{id}", method=RequestMethod.DELETE)
-	public String delete(
+	public Response delete(
 			@PathVariable("id") Long id, 
-			@RequestParam(value="productId") Long productId) {
+			@RequestParam(value="productId") Long productId) throws Exception {
 		
 		UserBase commentUser = commentService.getCommentById(id).getUser();
-		try {
-			// 判断操作用户是否是评论的所有者
-			if (!commentUser.getUid().equals(ThisUser.get().getUid()))
-				return "error";
-				
-			productService.removeComment(productId, id);
-			commentService.removeComment(id);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		// 判断操作用户是否是评论的所有者
+		if (!commentUser.getUid().equals(ThisUser.get().getUid()))
+			return new Response(false, "用户不是评论的所有者");
+			
+		productService.removeComment(productId, id);
+		commentService.removeComment(id);
 		
-		return "success";
+		return new Response(true, "删除评论成功");
 	}
 }

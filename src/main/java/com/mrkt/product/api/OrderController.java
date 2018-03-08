@@ -1,5 +1,7 @@
 package com.mrkt.product.api;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -7,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alibaba.fastjson.JSON;
 import com.mrkt.authorization.annotation.Authorization;
 import com.mrkt.product.core.IOrderService;
 import com.mrkt.product.model.Order;
+import com.mrkt.product.model.Response;
 
 /**
  * 商品订单 控制器.
@@ -31,13 +33,12 @@ public class OrderController {
 	 */
 	@Authorization
 	@RequestMapping(value="/product/{product_id}", method=RequestMethod.POST)
-	public String requestOrder(
+	public Response requestOrder(
 			@PathVariable("product_id") Long productId,
 			@RequestParam("message") String message) {
 		Order order = new Order();
 		order.setMessage(message);
-		return orderService.requestOrder(order, productId) ?
-				"success" : "error";
+		return new Response(orderService.requestOrder(order, productId), null);
 	}
 	
 	/**
@@ -47,10 +48,9 @@ public class OrderController {
 	 */
 	@Authorization
 	@RequestMapping(value="/{id}", method=RequestMethod.POST)
-	public String acceptOrder(
+	public Response acceptOrder(
 			@PathVariable("id") String id) {
-		return orderService.processOrder(id, 2) ?
-				"success" : "error";
+		return new Response(orderService.processOrder(id, 2), null);
 	}
 	
 	/**
@@ -60,10 +60,9 @@ public class OrderController {
 	 */
 	@Authorization
 	@RequestMapping(value="/{id}/seller", method=RequestMethod.DELETE)
-	public String cancelOrder(
+	public Response cancelOrder(
 			@PathVariable("id") String id) {
-		return orderService.processOrder(id, 0) ?
-				"success" : "error";
+		return new Response(orderService.processOrder(id, 0), null);
 	}
 	
 	/**
@@ -73,9 +72,9 @@ public class OrderController {
 	 */
 	@Authorization
 	@RequestMapping(value="/{id}/buyer", method=RequestMethod.DELETE)
-	public String deleteOrder(
+	public Response deleteOrder(
 			@PathVariable("id") String id) {
-		return "";
+		return new Response(orderService.deleteOrder(id), null);
 	}
 	
 	/**
@@ -89,7 +88,7 @@ public class OrderController {
 	 */
 	@Authorization
 	@RequestMapping(value="/{id}", method=RequestMethod.PUT)
-	public String submitOrder(
+	public Response submitOrder(
 			@PathVariable("id") String id,
 			@RequestParam("buyer_name") String buyerName,
 			@RequestParam("address") String address,
@@ -101,8 +100,7 @@ public class OrderController {
 		order.setAddress(address);
 		order.setBuyerPhone(phone);
 		order.setBuyerWx(buyerWx);
-		return orderService.submitOrder(order) ?
-				"success" : "error";
+		return new Response(orderService.submitOrder(order), null);
 	}
 	
 	/**
@@ -112,10 +110,9 @@ public class OrderController {
 	 */
 	@Authorization
 	@RequestMapping(value="/{id}/end", method=RequestMethod.PUT)
-	public String endOrder(
+	public Response endOrder(
 			@PathVariable("id") String id) {
-		return orderService.endOrder(id) ?
-				"success" : "error";
+		return new Response(orderService.endOrder(id), null);
 	}
 	
 	/**
@@ -127,12 +124,11 @@ public class OrderController {
 	 */
 	@Authorization
 	@RequestMapping(value="/{id}/buyer/comment", method=RequestMethod.PUT)
-	public String commentSeller(
+	public Response commentSeller(
 			@PathVariable("id") String id,
 			@RequestParam("score") Integer score,
 			@RequestParam("comment") String comment) {
-		return orderService.commentBuyer(id, score, comment) ?
-				"success" : "error";
+		return new Response(orderService.commentBuyer(id, score, comment), null);
 	}
 	
 	/**
@@ -144,12 +140,11 @@ public class OrderController {
 	 */
 	@Authorization
 	@RequestMapping(value="/{id}/seller/comment", method=RequestMethod.PUT)
-	public String commentBuyer(
+	public Response commentBuyer(
 			@PathVariable("id") String id,
 			@RequestParam("score") Integer score,
 			@RequestParam("comment") String comment) {
-		return orderService.commentSeller(id, score, comment) ?
-				"success" : "error";
+		return new Response(orderService.commentSeller(id, score, comment), null);
 	}
 	
 	/**
@@ -159,9 +154,9 @@ public class OrderController {
 	 */
 	@Authorization
 	@RequestMapping(value="/{id}", method=RequestMethod.GET)
-	public String findOne(
+	public Order findOne(
 			@PathVariable("id") String id) {
-		return JSON.toJSONString(orderService.findOne(id));
+		return orderService.findOne(id);
 	}
 	
 	/**
@@ -170,9 +165,8 @@ public class OrderController {
 	 */
 	@Authorization
 	@RequestMapping(value="/{id}/buyer/ordering", method=RequestMethod.GET)
-	public String findOrdering() {
-		return JSON.toJSONString(
-				orderService.findByStateAsBuyer(0, 2));
+	public List<Order> findOrdering() {
+		return orderService.findByStateAsBuyer(0, 2);
 	}
 	
 	/**
@@ -181,9 +175,8 @@ public class OrderController {
 	 */
 	@Authorization
 	@RequestMapping(value="/{id}/buyer/buy", method=RequestMethod.GET)
-	public String findBuy() {
-		return JSON.toJSONString(
-				orderService.findByStateAsBuyer(3, 4));
+	public List<Order> findBuy() {
+		return orderService.findByStateAsBuyer(3, 4);
 	}
 	
 	/**
@@ -192,8 +185,7 @@ public class OrderController {
 	 */
 	@Authorization
 	@RequestMapping(value="/{id}/seller", method=RequestMethod.GET)
-	public String findByStateAsSeller() {
-		return JSON.toJSONString(
-				orderService.findByStateAsSeller());
+	public List<Order> findByStateAsSeller() {
+		return orderService.findByStateAsSeller();
 	}
 }

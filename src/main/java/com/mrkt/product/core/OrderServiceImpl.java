@@ -178,7 +178,9 @@ public class OrderServiceImpl implements IOrderService {
 				product.setState(1);
 				productRepository.save(product);
 			}
-			orderRepository.delete(order);
+//			orderRepository.delete(order);
+			order.setState(-1);
+			orderRepository.save(order);
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();

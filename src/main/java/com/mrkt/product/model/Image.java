@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @ClassName	Image
@@ -34,6 +35,7 @@ public class Image implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="product_id")
 	@JSONField(serialize=false)
+	@JsonIgnore
 	private Product product;    // 多对一关联商品
 	
 	@Column(name="image_path")

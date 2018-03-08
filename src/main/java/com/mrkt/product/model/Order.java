@@ -73,7 +73,7 @@ public class Order implements Serializable {
 	private Double amount = 0d;             // 总金额
 
 	@Column(name = "state")
-	private Integer state = 1;              // 订单状态，0取消，1请求预定等待卖家接受预定，2待支付，3待确定收货，4/5待双方评价，6
+	private Integer state = 1;              // 订单状态，0取消，1请求预定等待卖家接受预定，2待支付，3待确定收货，4待双方评价， -1已删除
 
 	@Column(name = "message")
 	private String message;                 // 买家预定留言

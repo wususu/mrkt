@@ -2,6 +2,7 @@ package com.mrkt.product.api;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -18,11 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.alibaba.fastjson.JSON;
 import com.mrkt.authorization.annotation.Authorization;
 import com.mrkt.product.core.IProductService;
 import com.mrkt.product.model.Image;
 import com.mrkt.product.model.Product;
+import com.mrkt.product.model.Response;
 import com.mrkt.usr.ThisUser;
 
 /**
@@ -45,10 +46,10 @@ public class ProductController {
 	 */
 	@Authorization
 	@RequestMapping(value="/products/{id}", method=RequestMethod.GET)
-	public String getProduct(@PathVariable("id") Long id) {
+	public Product getProduct(@PathVariable("id") Long id) {
 		Product entity = productService.findOne(id);
 		logger.info("thisUser: " + ThisUser.get());
-		return JSON.toJSONString(entity);
+		return entity;
 	}
 	
 	/**
@@ -60,13 +61,13 @@ public class ProductController {
 	 * @return
 	 */
 	@RequestMapping(value="/products/all", method=RequestMethod.GET)
-	public String getProducts(
+	public Page<Product> getProducts(
 			@RequestParam("curr_page") Integer currPage, 
 			@RequestParam("type") String type, 
 			@RequestParam("order_way") String orderWay, 
 			@RequestParam("keywords") String keywords) {
 		Page<Product> page = productService.findPage(currPage, type, orderWay, keywords);
-		return JSON.toJSONString(page);
+		return page;
 	}
 	
 	/**
@@ -83,7 +84,7 @@ public class ProductController {
 	 */
 	@Authorization
 	@RequestMapping(value="/products", method=RequestMethod.POST)
-	public String addProduct(HttpServletRequest request,
+	public Response addProduct(HttpServletRequest request,
 			@RequestParam("name") String name,
 			@RequestParam("desc") String desc,
 			@RequestParam("price") Double price,
@@ -123,7 +124,7 @@ public class ProductController {
 		}
 		entity.setImages(imageSet);
 		productService.saveOrUpdate(entity);
-		return "success";
+		return new Response(true, "上架新商品成功");
 	}
 	
 	/**
@@ -131,7 +132,7 @@ public class ProductController {
 	 */
 	@Authorization
 	@RequestMapping(value="/products/{id}", method=RequestMethod.PUT)
-	public String updateProduct(HttpServletRequest request,
+	public Response updateProduct(HttpServletRequest request,
 			@PathVariable("id") Long id,
 			@RequestParam("name") String name,
 			@RequestParam("desc") String desc,
@@ -171,7 +172,7 @@ public class ProductController {
 		}
 		entity.setImages(imageSet);
 		productService.saveOrUpdate(entity);
-		return "success";
+		return new Response(true, "修改商品信息成功");
 	}
 	
 	/**
@@ -179,9 +180,9 @@ public class ProductController {
 	 */
 	@Authorization
 	@RequestMapping(value="/products/{id}", method=RequestMethod.DELETE)
-	public String cancelProduct(@PathVariable("id") Long id) {
+	public Response cancelProduct(@PathVariable("id") Long id) {
 		productService.cancel(id);
-		return "success";
+		return new Response(true, "下架商品成功");
 	}
 	
 	
@@ -190,9 +191,9 @@ public class ProductController {
 	 */
 	@Authorization
 	@RequestMapping(value="/products/{id}/likes", method=RequestMethod.POST)
-	public String addLikes(@PathVariable("id") Long id) {
+	public Response addLikes(@PathVariable("id") Long id) {
 		productService.addLikes(id);
-		return "success";
+		return new Response(true, "点赞成功");
 	}
 	
 	/**
@@ -200,18 +201,18 @@ public class ProductController {
 	 */
 	@Authorization
 	@RequestMapping(value="/products/{id}/likes", method=RequestMethod.DELETE)
-	public String removeLikes(@PathVariable("id") Long id) {
+	public Response removeLikes(@PathVariable("id") Long id) {
 		productService.removeLikes(id);
-		return "success";
+		return new Response(true, "取消点赞成功");
 	}
 	
 	/**
 	 * 收藏商品
 	 */
 	@RequestMapping(value="/products/{id}/collection", method=RequestMethod.POST)
-	public String addCollections(@PathVariable("id") Long id) {
+	public Response addCollections(@PathVariable("id") Long id) {
 		productService.addCollection(id);
-		return "success";
+		return new Response(true, "收藏商品成功");
 	}
 	
 	/**
@@ -219,9 +220,9 @@ public class ProductController {
 	 */
 	@Authorization
 	@RequestMapping(value="/products/{id}/collection", method=RequestMethod.DELETE)
-	public String removeCollection(@PathVariable("id") Long id) {
+	public Response removeCollection(@PathVariable("id") Long id) {
 		productService.removeCollection(id);
-		return "success";
+		return new Response(true, "取消收藏成功");
 	}
 	
 	/**
@@ -230,8 +231,8 @@ public class ProductController {
 	 */
 	@Authorization
 	@RequestMapping(value="/products/mine", method=RequestMethod.GET)
-	public String getMine() {
-		return JSON.toJSONString(productService.getMine());
+	public List<Product> getMine() {
+		return productService.getMine();
 	}
 	
 	/**
@@ -240,7 +241,7 @@ public class ProductController {
 	 */
 	@Authorization
 	@RequestMapping(value="/products/collection", method=RequestMethod.GET)
-	public String getCollection() {
-		return JSON.toJSONString(productService.getCollection());
+	public List<Product> getCollection() {
+		return productService.getCollection();
 	}
 }
