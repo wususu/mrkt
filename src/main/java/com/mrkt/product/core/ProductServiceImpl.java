@@ -45,7 +45,7 @@ public class ProductServiceImpl implements IProductService {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Product findOne(Long id) {
+	public Product findOne(Long id) throws Exception {
 		Product entity = productRepository.findOne(id);
 		// 查询一次具体商品详情浏览量加1
 		entity.setViews(entity.getViews()+1);
@@ -61,7 +61,7 @@ public class ProductServiceImpl implements IProductService {
 	}
 	
 	@Override
-	public void saveOrUpdate(Product entity){
+	public void saveOrUpdate(Product entity) throws Exception{
 		if (entity.getId() != null && entity.getId() >= 0) {
 			Product po = productRepository.findOne(entity.getId());
 			
@@ -87,7 +87,7 @@ public class ProductServiceImpl implements IProductService {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Page<Product> findPage(int currPage, String type, String orderWay, String keywords) {
+	public Page<Product> findPage(int currPage, String type, String orderWay, String keywords) throws Exception {
 		final int pageSize = 10;
 		
 		Specification<Product> sp = (root, query, builder) -> {
@@ -125,26 +125,26 @@ public class ProductServiceImpl implements IProductService {
 	}
 
 	@Override
-	public void cancel(Long id) {
+	public void cancel(Long id) throws Exception {
 		Product entity = productRepository.findOne(id);
 		entity.setState(0);// 下架商品，将商品状态设为0
 		productRepository.save(entity);
 	}
 
 	@Override
-	public void cancelAll(Long[] ids) {
+	public void cancelAll(Long[] ids) throws Exception {
 		for (Long id : ids) {
 			this.cancel(id);
 		}
 	}
 
 	@Override
-	public void delete(Long id) {
+	public void delete(Long id) throws Exception {
 		productRepository.delete(id);
 	}
 
 	@Override
-	public void deleteAll(Long[] ids) {
+	public void deleteAll(Long[] ids) throws Exception {
 		for (Long id : ids) {
 			this.delete(id);
 		}
@@ -152,12 +152,12 @@ public class ProductServiceImpl implements IProductService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void addLikes(Long id) {
+	public void addLikes(Long id) throws Exception {
 		try {
 			Long result = redisTemplate.boundSetOps("pro_like_" + id).add(
 					ThisUser.get().getUid());
 			if (result == null || result == 0)
-				throw new IllegalAccessException("用户已经点过赞");
+				throw new Exception("用户已经点过赞");
 			// 点赞数加1
 			Product entity = productRepository.findOne(id);
 			entity.setLikes(entity.getLikes() + 1);
@@ -165,33 +165,35 @@ public class ProductServiceImpl implements IProductService {
 		} catch (Exception e) {
 			logger.info("用户已经点过赞");
 			e.printStackTrace();
+			throw e;
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void removeLikes(Long id) {
+	public void removeLikes(Long id) throws Exception {
 		try {
 			Long result = redisTemplate.boundSetOps("pro_like_" + id).remove(
 					ThisUser.get().getUid());
 			if (result == null || result == 0)
-				throw new IllegalAccessException("用户没有点赞过该商品");
+				throw new Exception("用户没有点赞过该商品");
 			Product entity = productRepository.findOne(id);
 			entity.setLikes(entity.getLikes() - 1);
 			productRepository.saveAndFlush(entity);
 		} catch (Exception e) {
 			logger.info("用户没有点赞过该商品");
 			e.printStackTrace();
+			throw e;
 		}
 	}
 	@SuppressWarnings("unchecked")
 	@Override
-	public void addCollection(Long id) {
+	public void addCollection(Long id) throws Exception {
 		try {
 			Long result = redisTemplate.boundSetOps("pro_coll_" + id).add(
 					ThisUser.get().getUid());
 			if (result == null || result == 0)
-				throw new IllegalAccessException("用户已经收藏过该商品");
+				throw new Exception("用户已经收藏过该商品");
 			// 用户 收藏 商品，多对多，换成两个set存储在redis中
 			redisTemplate.boundSetOps("user_coll_" + ThisUser.get().getUid()).add(id);
 			// 收藏数加1
@@ -201,17 +203,18 @@ public class ProductServiceImpl implements IProductService {
 		} catch (Exception e) {
 			logger.info("用户已经收藏过该商品");
 			e.printStackTrace();
+			throw e;
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void removeCollection(Long id) {
+	public void removeCollection(Long id) throws Exception {
 		try {
 			Long result = redisTemplate.boundSetOps("pro_coll_" + id).remove(
 					ThisUser.get().getUid());
 			if (result == null || result == 0)
-				throw new IllegalAccessException("用户没有收藏过该商品");
+				throw new Exception("用户没有收藏过该商品");
 			// 用户 收藏 商品，多对多，换成两个set存储在redis中
 			redisTemplate.boundSetOps("user_coll_" + ThisUser.get().getUid()).remove(id);
 			Product entity = productRepository.findOne(id);
@@ -224,7 +227,7 @@ public class ProductServiceImpl implements IProductService {
 	}
 	
 	@Override
-	public Product addComment(Long productId, String commentContent) {
+	public Product addComment(Long productId, String commentContent) throws Exception {
 		Product originalProduct = productRepository.findOne(productId);
 		UserBase UserBase = ThisUser.get();
 		Comment comment = new Comment(UserBase, commentContent);
@@ -233,7 +236,7 @@ public class ProductServiceImpl implements IProductService {
 	}
 
 	@Override
-	public void removeComment(Long productId, Long commentId) {
+	public void removeComment(Long productId, Long commentId) throws Exception {
 		Product originalProduct = productRepository.findOne(productId);
 		originalProduct.removeComment(commentId);
 		productRepository.save(originalProduct);
@@ -241,7 +244,7 @@ public class ProductServiceImpl implements IProductService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Product> getMine() {
+	public List<Product> getMine() throws Exception {
 		Specification<Product> sp = (root, query, builder) -> {
 			List<Predicate> predicates = new ArrayList<>();
 			predicates.add(builder.equal(root.get("state").as(Integer.class), 1));
@@ -262,7 +265,7 @@ public class ProductServiceImpl implements IProductService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Product> getCollection() {
+	public List<Product> getCollection() throws Exception {
 		Set<Long> ids = redisTemplate.boundSetOps("user_coll_" + ThisUser.get().getUid())
 					 				 .members();
 		List<Product> products = productRepository.findAll(ids);

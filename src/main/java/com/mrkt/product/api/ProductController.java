@@ -2,7 +2,6 @@ package com.mrkt.product.api;
 
 import java.io.File;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -20,10 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.mrkt.authorization.annotation.Authorization;
+import com.mrkt.model.ReturnModel;
 import com.mrkt.product.core.IProductService;
 import com.mrkt.product.model.Image;
 import com.mrkt.product.model.Product;
-import com.mrkt.product.model.Response;
 import com.mrkt.usr.ThisUser;
 
 /**
@@ -43,13 +42,14 @@ public class ProductController {
 	
 	/**
 	 * 查询商品信息
+	 * @throws Exception 
 	 */
 	@Authorization
 	@RequestMapping(value="/products/{id}", method=RequestMethod.GET)
-	public Product getProduct(@PathVariable("id") Long id) {
+	public ReturnModel getProduct(@PathVariable("id") Long id) throws Exception {
 		Product entity = productService.findOne(id);
 		logger.info("thisUser: " + ThisUser.get());
-		return entity;
+		return ReturnModel.SUCCESS(entity);
 	}
 	
 	/**
@@ -59,15 +59,16 @@ public class ProductController {
 	 * @param orderWay tmCreated(按最新排序) or views(按浏览量排序)
 	 * @param keywords 搜索的关键词
 	 * @return
+	 * @throws Exception 
 	 */
 	@RequestMapping(value="/products/all", method=RequestMethod.GET)
-	public Page<Product> getProducts(
+	public ReturnModel getProducts(
 			@RequestParam("curr_page") Integer currPage, 
 			@RequestParam("type") String type, 
 			@RequestParam("order_way") String orderWay, 
-			@RequestParam("keywords") String keywords) {
+			@RequestParam("keywords") String keywords) throws Exception {
 		Page<Product> page = productService.findPage(currPage, type, orderWay, keywords);
-		return page;
+		return ReturnModel.SUCCESS(page);
 	}
 	
 	/**
@@ -81,10 +82,11 @@ public class ProductController {
 	 * @param count
 	 * @param uid
 	 * @return
+	 * @throws Exception 
 	 */
 	@Authorization
 	@RequestMapping(value="/products", method=RequestMethod.POST)
-	public Response addProduct(HttpServletRequest request,
+	public ReturnModel addProduct(HttpServletRequest request,
 			@RequestParam("name") String name,
 			@RequestParam("desc") String desc,
 			@RequestParam("price") Double price,
@@ -92,7 +94,7 @@ public class ProductController {
 			@RequestParam("ptype") String ptype,
 			@RequestParam("tra_way") String traWay,
 			@RequestParam("count") Integer count
-			) {
+			) throws Exception {
 		Product entity = new Product();
 		entity.setName(name);
 		entity.setDesc(desc);
@@ -124,15 +126,16 @@ public class ProductController {
 		}
 		entity.setImages(imageSet);
 		productService.saveOrUpdate(entity);
-		return new Response(true, "上架新商品成功");
+		return ReturnModel.SUCCESS();
 	}
 	
 	/**
 	 * 修改商品信息
+	 * @throws Exception 
 	 */
 	@Authorization
 	@RequestMapping(value="/products/{id}", method=RequestMethod.PUT)
-	public Response updateProduct(HttpServletRequest request,
+	public ReturnModel updateProduct(HttpServletRequest request,
 			@PathVariable("id") Long id,
 			@RequestParam("name") String name,
 			@RequestParam("desc") String desc,
@@ -140,7 +143,7 @@ public class ProductController {
 			@RequestParam("images") MultipartFile[] images,
 			@RequestParam("ptype") String ptype,
 			@RequestParam("tra_way") String traWay,
-			@RequestParam("count") Integer count) {
+			@RequestParam("count") Integer count) throws Exception {
 		Product entity = new Product();
 		entity.setId(id);
 		entity.setName(name);
@@ -172,76 +175,83 @@ public class ProductController {
 		}
 		entity.setImages(imageSet);
 		productService.saveOrUpdate(entity);
-		return new Response(true, "修改商品信息成功");
+		return ReturnModel.SUCCESS();
 	}
 	
 	/**
 	 * 下架商品
+	 * @throws Exception 
 	 */
 	@Authorization
 	@RequestMapping(value="/products/{id}", method=RequestMethod.DELETE)
-	public Response cancelProduct(@PathVariable("id") Long id) {
+	public ReturnModel cancelProduct(@PathVariable("id") Long id) throws Exception {
 		productService.cancel(id);
-		return new Response(true, "下架商品成功");
+		return ReturnModel.SUCCESS();
 	}
 	
 	
 	/**
 	 * 点赞
+	 * @throws Exception 
 	 */
 	@Authorization
 	@RequestMapping(value="/products/{id}/likes", method=RequestMethod.POST)
-	public Response addLikes(@PathVariable("id") Long id) {
+	public ReturnModel addLikes(@PathVariable("id") Long id) throws Exception {
 		productService.addLikes(id);
-		return new Response(true, "点赞成功");
+		return ReturnModel.SUCCESS();
 	}
 	
 	/**
 	 * 取消点赞
+	 * @throws Exception 
 	 */
 	@Authorization
 	@RequestMapping(value="/products/{id}/likes", method=RequestMethod.DELETE)
-	public Response removeLikes(@PathVariable("id") Long id) {
+	public ReturnModel removeLikes(@PathVariable("id") Long id) throws Exception {
 		productService.removeLikes(id);
-		return new Response(true, "取消点赞成功");
+		return ReturnModel.SUCCESS();
 	}
 	
 	/**
 	 * 收藏商品
+	 * @throws Exception 
 	 */
 	@RequestMapping(value="/products/{id}/collection", method=RequestMethod.POST)
-	public Response addCollections(@PathVariable("id") Long id) {
+	public ReturnModel addCollections(@PathVariable("id") Long id) throws Exception {
 		productService.addCollection(id);
-		return new Response(true, "收藏商品成功");
+		return ReturnModel.SUCCESS();
 	}
 	
 	/**
 	 * 取消收藏
+	 * @throws Exception 
 	 */
 	@Authorization
 	@RequestMapping(value="/products/{id}/collection", method=RequestMethod.DELETE)
-	public Response removeCollection(@PathVariable("id") Long id) {
+	public ReturnModel removeCollection(@PathVariable("id") Long id) throws Exception {
 		productService.removeCollection(id);
-		return new Response(true, "取消收藏成功");
+		return ReturnModel.SUCCESS();
 	}
 	
 	/**
 	 * 获取我发布的商品
 	 * @return
+	 * @throws Exception 
 	 */
 	@Authorization
 	@RequestMapping(value="/products/mine", method=RequestMethod.GET)
-	public List<Product> getMine() {
-		return productService.getMine();
+	public ReturnModel getMine() throws Exception {
+		return ReturnModel.SUCCESS(productService.getMine());
 	}
 	
 	/**
 	 * 获取我收藏的商品
 	 * @return
+	 * @throws Exception 
 	 */
 	@Authorization
 	@RequestMapping(value="/products/collection", method=RequestMethod.GET)
-	public List<Product> getCollection() {
-		return productService.getCollection();
+	public ReturnModel getCollection() throws Exception {
+		return ReturnModel.SUCCESS(productService.getCollection());
 	}
 }

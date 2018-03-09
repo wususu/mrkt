@@ -1,9 +1,11 @@
-package com.mrkt.exception;
+package com.mrkt.tool;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
+
+import com.mrkt.model.ReturnModel;
 
 /**
  * @ClassName	MyExceptionHandlerAdvice
@@ -17,7 +19,8 @@ public class MyExceptionHandlerAdvice {
 
 	// 定义全局异常处理，value属性可以过滤拦截条件，此处拦截所有的Exception
     @ExceptionHandler(value = Exception.class)
-    public @ResponseBody Exception exception(Exception exception, WebRequest request) {
-        return exception;
+    public @ResponseBody ReturnModel exception(Exception e, WebRequest request) {
+    	e.printStackTrace();
+        return ReturnModel.ERROR(ExceptionStatus.ERROR);
     }
 }

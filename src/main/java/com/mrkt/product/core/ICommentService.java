@@ -14,13 +14,15 @@ public interface ICommentService {
 	/**
 	 * 删除留言
 	 * @param id
+	 * @throws Exception 
 	 */
-	public void removeComment(Long id);
+	public void removeComment(Long id) throws Exception;
 	
 	/**
 	 * 通过id获取一条留言
 	 * @param id
 	 * @return
+	 * @throws Exception 
 	 */
-	public Comment getCommentById(Long id);
+	public Comment getCommentById(Long id) throws Exception;
 }

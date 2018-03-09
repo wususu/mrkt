@@ -20,12 +20,18 @@ public class CommentServiceImpl implements ICommentService {
 	private CommentRepository commentRepository;
 	
 	@Override
-	public void removeComment(Long id) {
+	public void removeComment(Long id) throws Exception {
+		if (id == null) {
+			throw new Exception("评论id为空，无法确定具体评论");
+		}
 		commentRepository.delete(id);
 	}
 
 	@Override
-	public Comment getCommentById(Long id) {
+	public Comment getCommentById(Long id) throws Exception {
+		if (id == null) {
+			throw new Exception("评论id为空，无法确定具体评论");
+		}
 		return commentRepository.findOne(id);
 	}
 
