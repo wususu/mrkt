@@ -34,13 +34,13 @@ public interface IProductService {
 	/**
 	 * 根据类型、最新/最热、关键词搜索展示商品，
 	 * @param currPage 当前页
-	 * @param type 商品类型
+	 * @param catId 商品分类编号1-9，null
 	 * @param orderWay 排序方式，最新（默认）发布时间；最热，赞/浏览量？
 	 * @param keywords 关键词
 	 * @return
 	 * @throws Exception 
 	 */
-	Page<Product> findPage(int currPage, String type, String orderWay, String keywords) throws Exception;
+	Page<Product> findPage(int currPage, Long catId, String orderWay, String keywords) throws Exception;
 	
 	/**
 	 * 商品下架，state，1->0

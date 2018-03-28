@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.mrkt.authorization.core.TokenManager;
 import com.mrkt.config.RedisConfig;
 import com.mrkt.sys.config.Configurator;
 import com.mrkt.usr.core.WxUserAction;
@@ -42,6 +43,10 @@ public class WxController {
 		APPID = cf.get("wx.app.id");
 		token = cf.get("wx.token");
 	}
+	
+	@Autowired
+	@Qualifier("redisTokenManager")
+	private TokenManager tokenManager;//TODO
 	
 	@Autowired
 	WxUserServiceImpl wxUserServiceImpl;
@@ -84,15 +89,20 @@ public class WxController {
 		if (accessToken.getOpenid()!=null) {
 			wxuser = wxUserServiceImpl.get(accessToken.getOpenid());
 			if (wxuser!=null &&( userAction.login(wxuser))) {
+				// TODO
+				String srect = tokenManager.create(wxuser.getMrktUser()).getSrect();
+				logger.info("-----------------srect: " + srect);
 				return wxuser;
 			}
 		}
 		if (accessToken.getAccess_token() != null && accessToken.getOpenid()!=null) {
 			String resp = httpRequest.doGet("https://api.weixin.qq.com/sns/userinfo?access_token="+accessToken.getAccess_token()+"&openid="+accessToken.getOpenid()+"&lang=zh_CN");
 			wxuser = JSON.parseObject(resp, WxUser.class);
+			logger.info(wxuser.toString());
 			userAction.register(wxuser);
 		}
-//		System.out.println(mrktRedisTemplate);
+
+//		System.out.println("test           test");
 		return (wxuser==null||wxuser.getNickName()==null)? null:wxuser;
 	}
 }

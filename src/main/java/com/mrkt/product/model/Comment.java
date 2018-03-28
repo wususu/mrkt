@@ -30,6 +30,7 @@ public class Comment implements Serializable {
 
 	@Id // 主键
 	@GeneratedValue(strategy = GenerationType.IDENTITY) // 自增长策略
+	@Column(name="comment_id")
 	private Long id; // 用户的唯一标识
 
 	@NotEmpty(message = "留言内容不能为空")

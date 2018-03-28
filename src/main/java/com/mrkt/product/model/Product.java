@@ -46,9 +46,6 @@ public class Product implements Serializable{
 	@Column(name="product_price")
 	private Double price=0d;         // 价格
 	
-//	@Column(name="product_image") // 改用表映射多张图片
-//	private String image;         // 图片路径
-	
 	@Column(name="product_views")
 	private Integer views = 0;        // 浏览量
 	
@@ -59,13 +56,13 @@ public class Product implements Serializable{
 	private Integer likes = 0;        // 点赞数
 	
 	@Column(name="product_type")
-	private String ptype;         // 商品类型
+	private String ptype;         // 商品分类名称，冗余字段
 	
 	@Column(name="product_tra_way")
 	private String traWay;        // 卖家支持的交易方式，第一版默认只支持当面交易
 	
 	@Column(name="product_count")
-	private Integer count;        // 商品库存/余量，因为二手市场，全默认为1
+	private Integer count = 1;        // 商品库存/余量，因为二手市场，全默认为1
 	
 	@Column(name="product_state")
 	private Integer state;        // 商品状态，0下架/删除；1发布；2被预定；3已售出；
@@ -77,6 +74,9 @@ public class Product implements Serializable{
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="product_tm_updated")
 	private Date tmUpdated;       // 记录更新时间/商品修改时间
+	
+	@Column(name="cat_id")
+	private Long catId;           // 商品分类id
 	
 	@ManyToOne
 	@JoinColumn(name="uid")
@@ -110,8 +110,8 @@ public class Product implements Serializable{
 		return "Product [id=" + id + ", name=" + name + ", desc=" + desc + ", price=" + price + ", views=" + views
 				+ ", collection=" + collection + ", likes=" + likes + ", ptype=" + ptype + ", traWay=" + traWay
 				+ ", count=" + count + ", state=" + state + ", tmCreated=" + tmCreated + ", tmUpdated=" + tmUpdated
-				+ ", mrktUser=" + mrktUser + ", images=" + images + ", comments=" + comments + ", isLike=" + isLike
-				+ ", isColl=" + isColl + "]";
+				+ ", catId=" + catId + ", mrktUser=" + mrktUser + ", images=" + images + ", comments=" + comments
+				+ ", isLike=" + isLike + ", isColl=" + isColl + "]";
 	}
 
 	@Override
@@ -281,6 +281,14 @@ public class Product implements Serializable{
 
 	public void setIsColl(Boolean isColl) {
 		this.isColl = isColl;
+	}
+	
+	public Long getCatId() {
+		return catId;
+	}
+
+	public void setCatId(Long catId) {
+		this.catId = catId;
 	}
 
 	/**

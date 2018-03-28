@@ -1,8 +1,10 @@
-package com.mrkt.model;
+package com.mrkt.dto;
+
+import java.io.Serializable;
 
 import com.mrkt.tool.ExceptionStatus;
 
-public class ReturnModel {
+public class ReturnModel implements Serializable {
 
 	private Integer code;
 	

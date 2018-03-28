@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
+import com.mrkt.authorization.annotation.Authorization;
+import com.mrkt.dto.ReturnModel;
 import com.mrkt.usr.core.UserServiceImpl;
 
 /**
@@ -28,9 +30,10 @@ public class UserController {
 	 * @param uid
 	 * @return
 	 */
+	@Authorization
 	@RequestMapping(value="/{uid}", method=RequestMethod.GET)
-	public String getUser(@PathVariable("uid") Long uid) {
-		return JSON.toJSONString(userService.get(uid));
+	public ReturnModel getUser(@PathVariable("uid") Long uid) {
+		return ReturnModel.SUCCESS(userService.get(uid));
 	}
 	
 	/**
@@ -38,6 +41,7 @@ public class UserController {
 	 * @param uid
 	 * @return
 	 */
+	@Authorization
 	@RequestMapping(value="/{uid}", method=RequestMethod.PUT)
 	public String editUser(@PathVariable("uid") Long uid) {
 		// 修改

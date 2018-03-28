@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mrkt.authorization.annotation.Authorization;
 import com.mrkt.config.StatusCodeConf;
-import com.mrkt.model.ReturnModel;
+import com.mrkt.dto.ReturnModel;
 import com.mrkt.product.core.ICommentService;
 import com.mrkt.product.core.IProductService;
 import com.mrkt.product.model.Comment;

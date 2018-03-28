@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.mrkt.authorization.annotation.Authorization;
-import com.mrkt.model.ReturnModel;
+import com.mrkt.dto.ReturnModel;
 import com.mrkt.product.core.IProductService;
 import com.mrkt.product.model.Image;
 import com.mrkt.product.model.Product;
@@ -54,8 +54,8 @@ public class ProductController {
 	
 	/**
 	 * 分页展示商品，搜索商品
-	 * @param currPage
-	 * @param type 商品类型
+	 * @param currPage 当前页码
+	 * @param cat_id 商品类型编号
 	 * @param orderWay tmCreated(按最新排序) or views(按浏览量排序)
 	 * @param keywords 搜索的关键词
 	 * @return
@@ -64,10 +64,10 @@ public class ProductController {
 	@RequestMapping(value="/products/all", method=RequestMethod.GET)
 	public ReturnModel getProducts(
 			@RequestParam("curr_page") Integer currPage, 
-			@RequestParam("type") String type, 
-			@RequestParam("order_way") String orderWay, 
-			@RequestParam("keywords") String keywords) throws Exception {
-		Page<Product> page = productService.findPage(currPage, type, orderWay, keywords);
+			@RequestParam(value="type", required=false) Long catId, 
+			@RequestParam(value="order_way", required=false) String orderWay, 
+			@RequestParam(value="keywords", required=false) String keywords) throws Exception {
+		Page<Product> page = productService.findPage(currPage, catId, orderWay, keywords);
 		return ReturnModel.SUCCESS(page);
 	}
 	
@@ -77,7 +77,7 @@ public class ProductController {
 	 * @param desc
 	 * @param price
 	 * @param images
-	 * @param ptype
+	 * @param catId
 	 * @param traWay
 	 * @param count
 	 * @param uid
@@ -87,19 +87,19 @@ public class ProductController {
 	@Authorization
 	@RequestMapping(value="/products", method=RequestMethod.POST)
 	public ReturnModel addProduct(HttpServletRequest request,
-			@RequestParam("name") String name,
-			@RequestParam("desc") String desc,
-			@RequestParam("price") Double price,
-			@RequestParam("images") MultipartFile[] images,
-			@RequestParam("ptype") String ptype,
-			@RequestParam("tra_way") String traWay,
-			@RequestParam("count") Integer count
+			@RequestParam(value="name") String name,
+			@RequestParam(value="desc", required=false, defaultValue="") String desc,
+			@RequestParam(value="price") Double price,
+			@RequestParam(value="images", required=false, defaultValue="") MultipartFile[] images,
+			@RequestParam(value="catId", required=false, defaultValue="9") Long catId,
+			@RequestParam(value="tra_way", required=false, defaultValue="当面交易") String traWay,
+			@RequestParam(value="count") Integer count
 			) throws Exception {
 		Product entity = new Product();
 		entity.setName(name);
 		entity.setDesc(desc);
 		entity.setPrice(price);
-		entity.setPtype(ptype);
+		entity.setCatId(catId);
 		entity.setTraWay(traWay);
 		entity.setCount(count);
 		entity.setMrktUser(ThisUser.get());
@@ -137,42 +137,43 @@ public class ProductController {
 	@RequestMapping(value="/products/{id}", method=RequestMethod.PUT)
 	public ReturnModel updateProduct(HttpServletRequest request,
 			@PathVariable("id") Long id,
-			@RequestParam("name") String name,
-			@RequestParam("desc") String desc,
-			@RequestParam("price") Double price,
-			@RequestParam("images") MultipartFile[] images,
-			@RequestParam("ptype") String ptype,
-			@RequestParam("tra_way") String traWay,
-			@RequestParam("count") Integer count) throws Exception {
+			@RequestParam(value="name") String name,
+			@RequestParam(value="desc") String desc,
+			@RequestParam(value="price") Double price,
+			@RequestParam(value="images", required=false) MultipartFile[] images,
+			@RequestParam(value="catId") Long catId,
+			@RequestParam(value="tra_way", required=false, defaultValue="当面交易") String traWay,
+			@RequestParam(value="count") Integer count) throws Exception {
 		Product entity = new Product();
 		entity.setId(id);
 		entity.setName(name);
 		entity.setDesc(desc);
 		entity.setPrice(price);
-		entity.setPtype(ptype);
+		entity.setCatId(catId);
 		entity.setTraWay(traWay);
 		entity.setCount(count);
 		// 处理图片
 		String rootpath = request.getServletContext().getRealPath("/");// 根路径
 		Set<Image> imageSet = new HashSet<>();
-		for (MultipartFile image : images) {
-			// 获取文件后缀名
-			String fileName = image.getOriginalFilename();
-			String suffixName = fileName.substring(fileName.lastIndexOf("."));
-			// 随机字符串加文件后缀名作为保存的文件名
-			String randomName = UUID.randomUUID() + suffixName;
-			String subpath = "upload/products/" + randomName;// 用于保存到数据库中的路径
-			
-			File filepath = new File(rootpath + subpath);
-			if (!filepath.getParentFile().exists())
-				filepath.getParentFile().mkdirs();
-			try {
-				image.transferTo(new File(rootpath + subpath));
-				imageSet.add(new Image(subpath));
-			} catch (Exception e) {
-				e.printStackTrace();
+		if (images != null)
+			for (MultipartFile image : images) {
+				// 获取文件后缀名
+				String fileName = image.getOriginalFilename();
+				String suffixName = fileName.substring(fileName.lastIndexOf("."));
+				// 随机字符串加文件后缀名作为保存的文件名
+				String randomName = UUID.randomUUID() + suffixName;
+				String subpath = "upload/products/" + randomName;// 用于保存到数据库中的路径
+				
+				File filepath = new File(rootpath + subpath);
+				if (!filepath.getParentFile().exists())
+					filepath.getParentFile().mkdirs();
+				try {
+					image.transferTo(new File(rootpath + subpath));
+					imageSet.add(new Image(subpath));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
-		}
 		entity.setImages(imageSet);
 		productService.saveOrUpdate(entity);
 		return ReturnModel.SUCCESS();

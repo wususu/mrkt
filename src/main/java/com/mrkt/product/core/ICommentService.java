@@ -16,7 +16,7 @@ public interface ICommentService {
 	 * @param id
 	 * @throws Exception 
 	 */
-	public void removeComment(Long id) throws Exception;
+	void removeComment(Long id) throws Exception;
 	
 	/**
 	 * 通过id获取一条留言
@@ -24,5 +24,5 @@ public interface ICommentService {
 	 * @return
 	 * @throws Exception 
 	 */
-	public Comment getCommentById(Long id) throws Exception;
+	Comment getCommentById(Long id) throws Exception;
 }

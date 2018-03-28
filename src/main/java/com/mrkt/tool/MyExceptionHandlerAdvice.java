@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
 
-import com.mrkt.model.ReturnModel;
+import com.mrkt.dto.ReturnModel;
 
 /**
  * @ClassName	MyExceptionHandlerAdvice

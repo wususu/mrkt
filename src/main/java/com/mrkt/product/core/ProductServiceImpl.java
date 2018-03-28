@@ -2,6 +2,7 @@ package com.mrkt.product.core;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.mrkt.product.dao.CategoryRepository;
 import com.mrkt.product.dao.ProductRepository;
 import com.mrkt.product.model.Comment;
 import com.mrkt.product.model.Product;
@@ -35,6 +37,8 @@ public class ProductServiceImpl implements IProductService {
 	private ProductRepository productRepository;
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private CategoryRepository categoryRepository;
 	
 	@SuppressWarnings("rawtypes")
 	@Autowired
@@ -69,9 +73,13 @@ public class ProductServiceImpl implements IProductService {
 			po.setName(entity.getName());
 			po.setDesc(entity.getDesc());
 			po.setPrice((entity.getPrice() != null) && (entity.getPrice() >= 0) ? entity.getPrice() : 0);
-			po.setPtype(entity.getPtype());
+			if (!po.getCatId().equals(entity.getCatId())) {
+				po.setCatId(entity.getCatId());
+				po.setPtype(categoryRepository.getOne(entity.getCatId()).getName());// 更新冗余字段数据
+			}
 			po.setCount(entity.getCount());
-			po.setImages(entity.getImages());
+			if (!entity.getImages().isEmpty())
+				po.setImages(entity.getImages());
 			
 			entity = po;
 			entity.setTmUpdated(new Date());
@@ -80,6 +88,7 @@ public class ProductServiceImpl implements IProductService {
 			// 发布商品，初始化基本信息
 			entity.setState(1);// 状态为发布
 			entity.setTmCreated(new Date());
+			entity.setPtype(categoryRepository.getOne(entity.getCatId()).getName());// 设置商品分类的具体名
 			entity.setMrktUser(userRepository.findOne(entity.getMrktUser().getUid()));
 		}
 		productRepository.save(entity);
@@ -87,7 +96,7 @@ public class ProductServiceImpl implements IProductService {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Page<Product> findPage(int currPage, String type, String orderWay, String keywords) throws Exception {
+	public Page<Product> findPage(int currPage, Long catId, String orderWay, String keywords) throws Exception {
 		final int pageSize = 10;
 		
 		Specification<Product> sp = (root, query, builder) -> {
@@ -100,8 +109,8 @@ public class ProductServiceImpl implements IProductService {
 	             */
 				List<Predicate> predicates = new ArrayList<>();
 				predicates.add(builder.equal(root.get("state").as(Integer.class), 1));// 状态为1的商品，表示待售
-				if (type != null && type.trim().length() > 0) {
-					predicates.add(builder.equal(root.get("ptype").as(String.class), type));
+				if (catId != null) {
+					predicates.add(builder.equal(root.get("catId").as(Long.class), catId));
 				}
 				if (keywords != null && keywords.trim().length() > 0) {
 					predicates.add(builder.like(root.get("name").as(String.class), "%" + keywords.trim() + "%"));
@@ -266,18 +275,23 @@ public class ProductServiceImpl implements IProductService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Product> getCollection() throws Exception {
-		Set<Long> ids = redisTemplate.boundSetOps("user_coll_" + ThisUser.get().getUid())
+		Set<Integer> idsInt = redisTemplate.boundSetOps("user_coll_" + ThisUser.get().getUid())
 					 				 .members();
-		List<Product> products = productRepository.findAll(ids);
-		// 处理当前用户对于商品的点赞情况和收藏情况
-		final UserBase currUser = ThisUser.get();
-		if (currUser != null)
-			products.forEach(product -> {
-				product.setIsLike(
-						redisTemplate.boundSetOps("pro_like_" + product.getId()).isMember(currUser.getUid()));
-				product.setIsColl(true);
-			});
-		return products;
+		if (idsInt != null) {
+			Set<Long> ids = new HashSet<>();
+			for (int i : idsInt) ids.add(new Long(i));
+			
+			List<Product> products = productRepository.findAll(ids);
+			// 处理当前用户对于商品的点赞情况和收藏情况
+			final UserBase currUser = ThisUser.get();
+			if (currUser != null)
+				products.forEach(product -> {
+					product.setIsLike(
+							redisTemplate.boundSetOps("pro_like_" + product.getId()).isMember(currUser.getUid()));
+					product.setIsColl(true);
+				});
+			return products;
+		} else return null;
 	}
 
 }

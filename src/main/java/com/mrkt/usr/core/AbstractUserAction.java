@@ -27,7 +27,6 @@ public class AbstractUserAction implements BaseUserAction, WxUserAction{
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean register(WxUser wxUser) {
-		// TODO Auto-generated method stub
 		if (wxUser.getMrktUser() != null) {
 			return true;
 		}
@@ -50,7 +49,6 @@ public class AbstractUserAction implements BaseUserAction, WxUserAction{
 
 	@Override
 	public boolean login(WxUser wxUser) {
-		// TODO Auto-generated method stub
 		UserBase user = null, fUser  = null;
 		Long uid = null;
 		

@@ -7,11 +7,16 @@ import javax.servlet.http.*;
 
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.mrkt.authorization.annotation.Authorization;
+import com.mrkt.authorization.core.RedisTokenManager;
 import com.mrkt.authorization.core.TokenManager;
 import com.mrkt.authorization.model.Token;
 import com.mrkt.sys.config.Configurator;
@@ -24,8 +29,9 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter{
 	private Configurator cgr;
 	
 	@Autowired
+	@Qualifier("redisTokenManager")
 	private TokenManager tokenManager;
-	
+
 	@Autowired
 	private UserServiceImpl userServiceImpl;
 	
@@ -85,7 +91,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter{
 		        		response.sendRedirect("https://open.weixin.qq.com/connect/oauth2/authorize?appid="
 		        				+this.wxAppId+
 		        				"&redirect_uri="
-		        				+	URLEncoder.encode(this.wxRedirectUri)+
+		        				+URLEncoder.encode(this.wxRedirectUri)+
 		        				"&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect");
 		        	return false;
 				}

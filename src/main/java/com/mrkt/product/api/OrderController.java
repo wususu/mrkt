@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mrkt.authorization.annotation.Authorization;
-import com.mrkt.model.ReturnModel;
+import com.mrkt.dto.ReturnModel;
 import com.mrkt.product.core.IOrderService;
 import com.mrkt.product.model.Order;
 
@@ -180,7 +180,7 @@ public class OrderController {
 	 * @throws Exception 
 	 */
 	@Authorization
-	@RequestMapping(value="/{id}/buyer/ordering", method=RequestMethod.GET)
+	@RequestMapping(value="/buyer/ordering", method=RequestMethod.GET)
 	public ReturnModel findOrdering() throws Exception {
 		return ReturnModel.SUCCESS(orderService.findByStateAsBuyer(0, 2));
 	}
@@ -191,7 +191,7 @@ public class OrderController {
 	 * @throws Exception 
 	 */
 	@Authorization
-	@RequestMapping(value="/{id}/buyer/buy", method=RequestMethod.GET)
+	@RequestMapping(value="/buyer/buy", method=RequestMethod.GET)
 	public ReturnModel findBuy() throws Exception {
 		return ReturnModel.SUCCESS(orderService.findByStateAsBuyer(3, 4));
 	}
@@ -202,7 +202,7 @@ public class OrderController {
 	 * @throws Exception 
 	 */
 	@Authorization
-	@RequestMapping(value="/{id}/seller", method=RequestMethod.GET)
+	@RequestMapping(value="/seller", method=RequestMethod.GET)
 	public ReturnModel findByStateAsSeller() throws Exception {
 		return ReturnModel.SUCCESS(orderService.findByStateAsSeller());
 	}

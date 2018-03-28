@@ -12,5 +12,5 @@ import com.mrkt.wx.model.WxUser;
 @Table(name="wx_usr")
 @Qualifier("wxUserRepository")
 public interface WxUserRepository extends JpaRepository<WxUser, String>{
-
+	
 }
