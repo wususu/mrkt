@@ -36,7 +36,6 @@ public class RedisTokenManager implements TokenManager{
 	@SuppressWarnings("unchecked")
 	@Override
 	public Token create(UserBase userBase) {
-		// TODO Auto-generated method stub
 		Token token = null;
 		if( (token=TokenIssues.tokenGenerator(userBase)) != null ){
 			redisTemplate.boundValueOps(token.getSrect()).set(token, tmTokenExpire, TimeUnit.MINUTES);
@@ -47,7 +46,6 @@ public class RedisTokenManager implements TokenManager{
 	@SuppressWarnings("unchecked")
 	@Override
 	public Boolean check(String srect) {
-		// TODO Auto-generated method stub
 		Token token = null;
 		if( 
 				srect == null || srect.length() != 32
@@ -64,7 +62,6 @@ public class RedisTokenManager implements TokenManager{
 	@SuppressWarnings("unchecked")
 	@Override
 	public Token get(String srect) {
-		// TODO Auto-generated method stub
 		Token token = null;
 		if(
 				(token = (Token) redisTemplate.boundValueOps(srect).get() ) != null
@@ -74,9 +71,9 @@ public class RedisTokenManager implements TokenManager{
 		return token;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void remove(String srect) {
-		// TODO Auto-generated method stub
 		redisTemplate.boundValueOps(srect).expireAt(new Date());
 	}
 

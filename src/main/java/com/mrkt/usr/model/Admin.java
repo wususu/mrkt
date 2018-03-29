@@ -20,7 +20,6 @@ implements Serializable{
 	private static final long serialVersionUID = -3177295695776605542L;
 	
 	public Admin() {
-		// TODO Auto-generated constructor stub
 		super();
 		return ;
 	}
@@ -31,7 +30,6 @@ implements Serializable{
 	
 	@Override
 	public boolean equals(Object obj) {
-		// TODO Auto-generated method stub
 		if (obj == this) {
 			return true;
 		}

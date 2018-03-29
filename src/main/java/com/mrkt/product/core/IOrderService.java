@@ -82,7 +82,7 @@ public interface IOrderService {
 	List<Order> findByStateAsSeller() throws Exception;
 	
 	/**
-	 * 买家删除任何状态的订单，终止本次交易。如果不是已成交/下架的商品（state==3/0），商品状态都恢复为售卖（state==1）
+	 * 买家删除任何状态的订单，终止本次交易。
 	 * @param id
 	 * @return
 	 * @throws Exception 

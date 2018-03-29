@@ -14,6 +14,7 @@ public class TokenIssues {
 	
 	public static Token tokenGenerator(UserBase user){
 		Token token = new Token(newSecret(), user.getuName(), user.getUid());
+//		System.out.println("TokenIssues: " + token.getSrect());
 		return token;
 	}
 }

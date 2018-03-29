@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mrkt.authorization.annotation.Authorization;
 import com.mrkt.dto.ReturnModel;
+import com.mrkt.product.constant.OrderState;
 import com.mrkt.product.core.IOrderService;
 import com.mrkt.product.model.Order;
 
@@ -51,7 +52,7 @@ public class OrderController {
 	@RequestMapping(value="/{id}", method=RequestMethod.POST)
 	public ReturnModel acceptOrder(
 			@PathVariable("id") String id) throws Exception {
-		return orderService.processOrder(id, 2) ?
+		return orderService.processOrder(id, OrderState.BE_WAITING_PYAMENT.getState()) ?
 				ReturnModel.SUCCESS() : ReturnModel.ERROR();
 	}
 	
@@ -65,7 +66,7 @@ public class OrderController {
 	@RequestMapping(value="/{id}/seller", method=RequestMethod.DELETE)
 	public ReturnModel cancelOrder(
 			@PathVariable("id") String id) throws Exception {
-		return orderService.processOrder(id, 0) ?
+		return orderService.processOrder(id, OrderState.BE_CANCELED.getState()) ?
 				ReturnModel.SUCCESS() : ReturnModel.ERROR();
 	}
 	
@@ -135,7 +136,7 @@ public class OrderController {
 	 */
 	@Authorization
 	@RequestMapping(value="/{id}/buyer/comment", method=RequestMethod.PUT)
-	public ReturnModel commentSeller(
+	public ReturnModel commentBuyer(
 			@PathVariable("id") String id,
 			@RequestParam("score") Integer score,
 			@RequestParam("comment") String comment) throws Exception {
@@ -153,7 +154,7 @@ public class OrderController {
 	 */
 	@Authorization
 	@RequestMapping(value="/{id}/seller/comment", method=RequestMethod.PUT)
-	public ReturnModel commentBuyer(
+	public ReturnModel commentSeller(
 			@PathVariable("id") String id,
 			@RequestParam("score") Integer score,
 			@RequestParam("comment") String comment) throws Exception {

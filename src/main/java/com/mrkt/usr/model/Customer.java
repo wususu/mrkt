@@ -19,7 +19,6 @@ implements Serializable{
 	private static final long serialVersionUID = -6556977703181333226L;
 
 	public Customer() {
-		// TODO Auto-generated constructor stub
 		super();
 		return ;
 	}
@@ -31,7 +30,6 @@ implements Serializable{
 	
 	@Override
 	public boolean equals(Object obj) {
-		// TODO Auto-generated method stub
 		if (obj == this){
 			return true;
 		}
@@ -52,7 +50,6 @@ implements Serializable{
 	
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
 		return String.format(
 				"%d#%s%s",
 				this.getUid(), this.getuName(), this.getnName());

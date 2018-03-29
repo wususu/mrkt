@@ -76,7 +76,6 @@ public class UserBase implements Serializable{
 	private String stuNmbr;
 
 	public UserBase() {
-		// TODO Auto-generated constructor stub
 	}
 	
 	public UserBase(WxUser wxUser){

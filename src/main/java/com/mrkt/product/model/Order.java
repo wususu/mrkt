@@ -52,10 +52,10 @@ public class Order implements Serializable {
 	private String buyerPhone;              // 买家必填
 
 	@Column(name = "buyer_score")
-	private Integer buyerScore = 0;         // 卖家对买家评分
+	private Integer buyerScore = 0;         // 对买家评分
 
 	@Column(name = "buyer_comment")
-	private String buyerComment;            // 卖家对买家的评语
+	private String buyerComment;            // 对买家的评语
 
 	@Column(name = "seller_id")
 	private Long sellerId;                  // 卖家id，实际为商品所属卖家的uid
@@ -64,10 +64,10 @@ public class Order implements Serializable {
 	private String sellerName;              // 卖家称呼，实际为微信名
 
 	@Column(name = "seller_score")
-	private Integer sellerScore = 0;        // 买家对卖家评分
+	private Integer sellerScore = 0;        // 对卖家评分
 
 	@Column(name = "seller_comment")
-	private String sellerComment;           // 卖家对买家的评语
+	private String sellerComment;           // 对卖家的评语
 
 	@Column(name = "amount")
 	private Double amount = 0d;             // 总金额

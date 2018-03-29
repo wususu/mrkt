@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.mrkt.authorization.core.TokenManager;
 import com.mrkt.config.RedisConfig;
+import com.mrkt.dto.ReturnModel;
 import com.mrkt.sys.config.Configurator;
 import com.mrkt.usr.core.WxUserAction;
 import com.mrkt.wx.core.HttpRequest;
@@ -46,7 +47,7 @@ public class WxController {
 	
 	@Autowired
 	@Qualifier("redisTokenManager")
-	private TokenManager tokenManager;//TODO
+	private TokenManager tokenManager;// TODO
 	
 	@Autowired
 	WxUserServiceImpl wxUserServiceImpl;
@@ -90,9 +91,10 @@ public class WxController {
 			wxuser = wxUserServiceImpl.get(accessToken.getOpenid());
 			if (wxuser!=null &&( userAction.login(wxuser))) {
 				// TODO
-				String srect = tokenManager.create(wxuser.getMrktUser()).getSrect();
-				logger.info("-----------------srect: " + srect);
-				return wxuser;
+//				String srect = tokenManager.create(wxuser.getMrktUser()).getSrect();
+//				logger.info("-----------------srect: " + srect);
+//				return wxuser;
+				return ReturnModel.SUCCESS(tokenManager.create(wxuser.getMrktUser()));
 			}
 		}
 		if (accessToken.getAccess_token() != null && accessToken.getOpenid()!=null) {

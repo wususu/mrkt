@@ -1,7 +1,6 @@
 package com.mrkt.config;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -45,6 +44,7 @@ public class RedisConfig extends CachingConfigurerSupport{
         };
     }
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Bean
 	@Qualifier("redisTemplate")
 	public StringRedisTemplate redisTemplate(){		
@@ -62,6 +62,7 @@ public class RedisConfig extends CachingConfigurerSupport{
         return template;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	@Bean
 	public CacheManager cacheManager(RedisTemplate redisTemplate){
 		RedisCacheManager cacheManager = new RedisCacheManager(redisTemplate);

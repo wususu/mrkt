@@ -1,5 +1,7 @@
 package com.mrkt.product.dao;
 
+import java.util.List;
+
 import javax.persistence.Table;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -36,5 +38,12 @@ public interface OrderRepository extends JpaRepository<Order, String>, JpaSpecif
 	 * @return
 	 */
 	Order findByIdAndSellerId(String id, Long sellerId);
+	
+	/**
+	 * 通过商品编号查询到商品编号下的订单
+	 * @param productId 商品编号
+	 * @return
+	 */
+	List<Order> findByProductId(Long productId);
 	
 }

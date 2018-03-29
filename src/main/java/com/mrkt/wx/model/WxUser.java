@@ -9,16 +9,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.mrkt.usr.model.Customer;
 import com.mrkt.usr.model.UserBase;
 @JsonIgnoreProperties({ "handler","hibernateLazyInitializer" }) //for test
 @Table(name="wx_usr")
 @Entity
 public class WxUser implements Serializable{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -45,7 +41,6 @@ public class WxUser implements Serializable{
 	private UserBase mrktUser;
 
 	public WxUser() {
-		// TODO Auto-generated constructor stub
 	}
 	
 	public String getOpenID() {

@@ -6,6 +6,8 @@ import com.mrkt.tool.ExceptionStatus;
 
 public class ReturnModel implements Serializable {
 
+	private static final long serialVersionUID = 226291821671270583L;
+
 	private Integer code;
 	
 	private String message;

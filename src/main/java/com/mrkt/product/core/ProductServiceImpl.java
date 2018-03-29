@@ -22,6 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.mrkt.product.constant.ProductState;
 import com.mrkt.product.dao.CategoryRepository;
 import com.mrkt.product.dao.ProductRepository;
 import com.mrkt.product.model.Comment;
@@ -108,7 +109,7 @@ public class ProductServiceImpl implements IProductService {
 	             * @return 断言
 	             */
 				List<Predicate> predicates = new ArrayList<>();
-				predicates.add(builder.equal(root.get("state").as(Integer.class), 1));// 状态为1的商品，表示待售
+				predicates.add(builder.equal(root.get("state").as(Integer.class), ProductState.ON_SALE.getState()));// 状态为1的商品，表示售卖中
 				if (catId != null) {
 					predicates.add(builder.equal(root.get("catId").as(Long.class), catId));
 				}
@@ -136,7 +137,7 @@ public class ProductServiceImpl implements IProductService {
 	@Override
 	public void cancel(Long id) throws Exception {
 		Product entity = productRepository.findOne(id);
-		entity.setState(0);// 下架商品，将商品状态设为0
+		entity.setState(ProductState.BE_OFF.getState());// 下架商品，将商品状态设为0
 		productRepository.save(entity);
 	}
 
