@@ -1,4 +1,4 @@
-package com.mrkt.tool;
+package com.mrkt.exception;
 
 import com.mrkt.config.StatusCodeConf;
 

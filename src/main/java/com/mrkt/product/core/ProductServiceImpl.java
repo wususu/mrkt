@@ -167,13 +167,13 @@ public class ProductServiceImpl implements IProductService {
 			Long result = redisTemplate.boundSetOps("pro_like_" + id).add(
 					ThisUser.get().getUid());
 			if (result == null || result == 0)
-				throw new Exception("用户已经点过赞");
+				throw new Exception("用户操作错误：用户已经点过赞");
 			// 点赞数加1
 			Product entity = productRepository.findOne(id);
 			entity.setLikes(entity.getLikes() + 1);
 			productRepository.saveAndFlush(entity);
 		} catch (Exception e) {
-			logger.info("用户已经点过赞");
+			logger.info("用户操作错误：用户已经点过赞");
 			e.printStackTrace();
 			throw e;
 		}
@@ -186,12 +186,12 @@ public class ProductServiceImpl implements IProductService {
 			Long result = redisTemplate.boundSetOps("pro_like_" + id).remove(
 					ThisUser.get().getUid());
 			if (result == null || result == 0)
-				throw new Exception("用户没有点赞过该商品");
+				throw new Exception("用户操作错误：用户没有点赞过该商品");
 			Product entity = productRepository.findOne(id);
 			entity.setLikes(entity.getLikes() - 1);
 			productRepository.saveAndFlush(entity);
 		} catch (Exception e) {
-			logger.info("用户没有点赞过该商品");
+			logger.info("用户操作错误：用户没有点赞过该商品");
 			e.printStackTrace();
 			throw e;
 		}
@@ -203,7 +203,7 @@ public class ProductServiceImpl implements IProductService {
 			Long result = redisTemplate.boundSetOps("pro_coll_" + id).add(
 					ThisUser.get().getUid());
 			if (result == null || result == 0)
-				throw new Exception("用户已经收藏过该商品");
+				throw new Exception("用户操作错误：用户已经收藏过该商品");
 			// 用户 收藏 商品，多对多，换成两个set存储在redis中
 			redisTemplate.boundSetOps("user_coll_" + ThisUser.get().getUid()).add(id);
 			// 收藏数加1
@@ -211,7 +211,7 @@ public class ProductServiceImpl implements IProductService {
 			entity.setCollection(entity.getCollection() + 1);
 			productRepository.saveAndFlush(entity);
 		} catch (Exception e) {
-			logger.info("用户已经收藏过该商品");
+			logger.info("用户操作错误：用户已经收藏过该商品");
 			e.printStackTrace();
 			throw e;
 		}
@@ -224,14 +224,14 @@ public class ProductServiceImpl implements IProductService {
 			Long result = redisTemplate.boundSetOps("pro_coll_" + id).remove(
 					ThisUser.get().getUid());
 			if (result == null || result == 0)
-				throw new Exception("用户没有收藏过该商品");
+				throw new Exception("用户操作错误：用户没有收藏过该商品");
 			// 用户 收藏 商品，多对多，换成两个set存储在redis中
 			redisTemplate.boundSetOps("user_coll_" + ThisUser.get().getUid()).remove(id);
 			Product entity = productRepository.findOne(id);
 			entity.setCollection(entity.getCollection() - 1);
 			productRepository.saveAndFlush(entity);
 		} catch (Exception e) {
-			logger.info("用户没有收藏过该商品");
+			logger.info("用户操作错误：用户没有收藏过该商品");
 			e.printStackTrace();
 		}
 	}

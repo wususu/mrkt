@@ -26,6 +26,7 @@ public class ThisUserTest {
 	public void test() {
 		
 		UserBase userBase = userServiceImpl.get((long)1);
+		System.out.println("com.mrkt.usr.ThisUserTest.test(): " + userBase.toString());// TODO
 		Assert.assertEquals(Customer.class, userBase.getClass());
 		ThisUser.set(userBase);
 		UserBase userBase2 = ThisUser.get();
